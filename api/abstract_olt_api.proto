@@ -1,0 +1,106 @@
+//Copyright 2017 the original author or authors.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+
+//       http://www.apache.org/licenses/LICENSE-2.0
+
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+syntax = "proto3";
+package api;
+import "google/api/annotations.proto";
+
+message AddChassisMessage{
+   string CLLI =1;
+   string VCoreIP =2;
+   int32 VCorePort=3;
+}
+message Error {
+   int32 ErrorNum = 1;
+   string ErrorMessage=2;
+   int32 Serverity=3;
+}
+message AddChassisReturn{
+   string DeviceID = 1;
+   Error error = 2;
+}
+message AddOLTChassisMessage{
+   string CLLI=1;
+   string SlotIP=2;
+   fixed32 SlotPort=3;
+   string Hostname=4;
+   fixed32 NumPorts = 5;
+   bool Activate = 6;
+   enum OltDriver {
+      openoltDriver = 0;
+      asfvolt16Driver=1;
+      adtranDriver=2;
+      tibitsDriver=3;
+   }
+   OltDriver Driver=7;
+   enum OltType{
+      edgecore=0;
+      adtran=1;
+      tibit=2;
+   }
+   OltType Type=8;
+
+}
+message AddOLTChassisReturn {
+   string DeviceID =1;
+   string ChassisDeviceID =2;
+   Error error = 3;
+}
+message ActivateSlotMessage{
+   string SlotDeviceID = 1;
+}
+message ActivateSlotReturn{
+   bool Success = 1;
+   Error error = 2;
+}
+message AddOntMessage{
+   string ChassisDeviceID=1;
+   string SlotDeviceID=2;
+   int32 PortNumber=3;
+   int32 OntNumber=4;
+}
+message AddOntReturn{
+   bool Success=1;
+   Error error = 2;
+}
+
+service AddChassis{
+   rpc CreateChassis(AddChassisMessage) returns (AddChassisReturn) {
+      option(google.api.http) = {
+         post: "/1/CreateAbstractChassis"
+	 body:"*"
+      };
+   }
+}
+
+service AddOLTChassis {
+   rpc CreateOLTChassis(AddOLTChassisMessage) returns (AddOLTChassisReturn) {
+      option(google.api.http) = {
+         post: "/1/CreateOLTChassis"
+	 body:"*"
+      };
+   }
+}
+service ActivateSlot{
+   rpc EnableSlot(ActivateSlotMessage) returns (ActivateSlotReturn){
+      option(google.api.http) = {
+         post: "/1/EnableSlot"
+	 body:"*"
+      };
+   }
+}
+service ActivateOnt {
+   rpc ProvisionOnt(AddOntMessage) returns (AddOntReturn) {}
+}
+
