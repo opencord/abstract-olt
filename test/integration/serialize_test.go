@@ -17,7 +17,6 @@
 package integration
 
 import (
-	"net"
 	"testing"
 
 	"gerrit.opencord.org/abstract-olt/internal/pkg/chassisSerialize"
@@ -42,22 +41,19 @@ func TestSerialize(t *testing.T) {
 }
 
 func generateTestChassis() *abstract.Chassis {
-	addr := net.TCPAddr{IP: net.IPv4(1, 2, 3, 4), Port: 500, Zone: "VCore ZONE"}
-	chassis := abstract.Chassis{VCoreAddress: addr, CLLI: "CLLI STRING"}
+	chassis := abstract.GenerateChassis("My_CLLI")
 
 	var slots [16]abstract.Slot
 	for i := 0; i < 16; i++ {
-		slots[i] = generateTestSlot(i, &chassis)
+		slots[i] = generateTestSlot(i, chassis)
 	}
 
 	chassis.Slots = slots
-	return &chassis
+	return chassis
 }
 
 func generateTestSlot(n int, c *abstract.Chassis) abstract.Slot {
-	addr := net.TCPAddr{IP: net.IPv4(1, 2, 3, byte(n)), Port: 400 + n, Zone: "Slot " + string(n) + "Zone"}
-	slot := abstract.Slot{DeviceID: "Device Slot " + string(n), Hostname: "Host " + string(n),
-		Address: addr, Number: n, Parent: c}
+	slot := abstract.Slot{Number: n, Parent: c}
 
 	var ports [16]abstract.Port
 	for i := 0; i < 16; i++ {
@@ -69,7 +65,7 @@ func generateTestSlot(n int, c *abstract.Chassis) abstract.Slot {
 }
 
 func generateTestPort(n int, s *abstract.Slot) abstract.Port {
-	port := abstract.Port{Number: n, DeviceID: "Device Port " + string(n), Parent: s}
+	port := abstract.Port{Number: n, Parent: s}
 
 	var onts [64]abstract.Ont
 	for i := 0; i < 64; i++ {

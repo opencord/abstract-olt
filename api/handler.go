@@ -42,25 +42,25 @@ func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*Add
 	phyChassisMap := models.GetPhyChassisMap()
 	absChassisMap := models.GetAbstractChassisMap()
 	clli := in.GetCLLI()
-
 	chassis := (*phyChassisMap)[clli]
 	if chassis != nil {
 		return &AddChassisReturn{DeviceID: chassis.CLLI}, nil
 	}
 	abstractChassis := abstract.GenerateChassis(clli)
-	phyChassis := physical.Chassis{CLLI: clli}
+	phyChassis := &physical.Chassis{CLLI: clli}
 	if settings.GetDebug() {
 		output := fmt.Sprintf("%v", abstractChassis)
 		formatted := strings.Replace(output, "{", "\n{", -1)
 		log.Printf("new chassis %s\n", formatted)
 	}
-	(*phyChassisMap)[clli] = &phyChassis
+	(*phyChassisMap)[clli] = phyChassis
+	fmt.Printf("phy %v, abs %v\n", phyChassisMap, absChassisMap)
 	(*absChassisMap)[clli] = abstractChassis
 	return &AddChassisReturn{DeviceID: clli}, nil
 }
 
 /*
-AddOLTChassis adds an OLT chassis/line card to the Physical chassis
+CreateOLTChassis adds an OLT chassis/line card to the Physical chassis
 */
 func (s *Server) CreateOLTChassis(ctx context.Context, in *AddOLTChassisMessage) (*AddOLTChassisReturn, error) {
 	fmt.Printf(" CreateOLTChassis %v \n", *in)

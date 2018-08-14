@@ -43,8 +43,10 @@ api/abstract_olt_api.pb.gw.go :
 	--grpc-gateway_out=logtostderr=true:api \
 	 api/abstract_olt_api.proto
 
+api/xos.go:
+
 swagger:
-	protoc -I api/ \
+	@protoc -I api/ \
   -I${GOPATH}/src \
   -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --swagger_out=logtostderr=true:api \
@@ -63,6 +65,11 @@ client: dep api ## Build the binary file for client
 
 clean: ## Remove previous builds
 	@rm $(SERVER_OUT) $(CLIENT_OUT) $(API_OUT) $(API_REST_OUT) $(SWAGGER_OUT)
+	@rm -rf seba-api
+
+test: all
+	@go test ./...
+	@go test ./... -cover
 
 help: ## Display this help screen
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
