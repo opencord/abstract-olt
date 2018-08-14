@@ -69,6 +69,7 @@ message AddOntMessage{
    string SlotDeviceID=2;
    int32 PortNumber=3;
    int32 OntNumber=4;
+   string SerialNumber=5;
 }
 message AddOntReturn{
    bool Success=1;
