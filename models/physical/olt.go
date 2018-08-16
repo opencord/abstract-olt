@@ -29,6 +29,7 @@ type OLT interface {
 	GetPorts() []PONPort
 	GetParent() *Chassis
 	GetDataSwitchPort() int
+	activate() error
 }
 
 /*
@@ -72,4 +73,9 @@ func (s *SimpleOLT) GetParent() *Chassis {
 
 func (s *SimpleOLT) GetDataSwitchPort() int {
 	return s.DataSwitchPort
+}
+func (s *SimpleOLT) activate() error {
+	s.Active = true
+	//TODO make call to XOS to activate phyiscal OLT
+	return nil
 }

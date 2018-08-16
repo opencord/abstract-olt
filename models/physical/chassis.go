@@ -30,6 +30,14 @@ type Chassis struct {
 	Dataswitch   DataSwitch
 	Linecards    []OLT
 }
+type UnprovisionedSlotError struct {
+	CLLI       string
+	SlotNumber int
+}
+
+func (e *UnprovisionedSlotError) Error() string {
+	return fmt.Sprintf("SlotNumber %d in Chassis %s is currently unprovsioned", e.SlotNumber, e.CLLI)
+}
 
 /*
 AddOLTChassis - adds a reference to a new olt chassis
@@ -42,4 +50,11 @@ func (chassis *Chassis) AddOLTChassis(olt OLT) {
 func (chassis *Chassis) provisionONT(ont Ont) {
 	//TODO - api call to provison s/c vlans and ont serial number etc
 	fmt.Printf("chassis.provisionONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
+}
+func (chassis *Chassis) ActivateSlot(slotNumber int) error {
+	// AT&T backend systems start at 1 and not 0 :P
+	if chassis.Linecards[slotNumber-1] == nil {
+		return &UnprovisionedSlotError{CLLI: chassis.CLLI, SlotNumber: slotNumber}
+	}
+	return chassis.Linecards[slotNumber-1].activate()
 }

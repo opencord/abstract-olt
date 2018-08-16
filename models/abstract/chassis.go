@@ -59,6 +59,6 @@ func (chassis *Chassis) NextPort() (*Port, error) {
 	return nextPort, nil
 }
 func (chassis *Chassis) ActivateONT(slotNumber int, portNumber int, ontNumber int, serialNumber string) error {
-	err := chassis.Slots[slotNumber-1].Ports[portNumber].provisionOnt(ontNumber, serialNumber)
+	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].provisionOnt(ontNumber, serialNumber)
 	return err
 }

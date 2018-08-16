@@ -22,6 +22,7 @@ import (
 
 	"gerrit.opencord.org/abstract-olt/api"
 	"gerrit.opencord.org/abstract-olt/models/abstract"
+	"gerrit.opencord.org/abstract-olt/models/physical"
 	"golang.org/x/net/context"
 )
 
@@ -40,7 +41,6 @@ func TestHandler_CreateChassis(t *testing.T) {
 		t.Fatalf("CreateChassis failed %v\n", err)
 	}
 	clli = ret.DeviceID
-
 }
 func TestHandler_CreateOLTChassis(t *testing.T) {
 	fmt.Println("in handlerTest_CreateChassis")
@@ -51,6 +51,30 @@ func TestHandler_CreateOLTChassis(t *testing.T) {
 		t.Fatalf("CreateOLTChassis failed %v\n", err)
 	}
 	fmt.Printf("CreateOLTChassis success %v\n", ret)
+}
+func TestHandler_EnableSlot(t *testing.T) {
+	ctx = context.Background()
+	server = api.Server{}
+	fmt.Println("in handler_test_EnableSlot")
+	// slot number 1 should be provisioned above
+	message := &api.ActivateSlotMessage{CLLI: clli, SlotNumber: 1}
+	ret, err := server.EnableSlot(ctx, message)
+	if err != nil {
+		t.Fatalf("EnableSlot failed with %v\n", err)
+	}
+	fmt.Printf("EnableSlot succeeded with %v\n", ret)
+	// Slot 2 isn't provisioned and should fail
+	message = &api.ActivateSlotMessage{CLLI: clli, SlotNumber: 2}
+	ret, err = server.EnableSlot(ctx, message)
+	if err != nil {
+		switch err.(type) {
+		case *physical.UnprovisionedSlotError:
+			fmt.Printf("EnableSlot failed as it should with %v\n", err)
+		default:
+			t.Fatalf("EnableSlot failed with %v\n", err)
+		}
+		t.Fatalf("EnableSlot should have failed but didn't")
+	}
 
 }
 func TestHandler_ProvisionOnt(t *testing.T) {
@@ -65,6 +89,7 @@ func TestHandler_ProvisionOnt(t *testing.T) {
 	}
 	// this one should fail
 	fmt.Println("here")
+	//SlotNumber 1 hasn't been provisioned
 	message = &api.AddOntMessage{CLLI: clli, SlotNumber: 2, PortNumber: 3, OntNumber: 2, SerialNumber: "2033029402"}
 	ret, err = server.ProvisionOnt(ctx, message)
 	if err != nil {
@@ -78,5 +103,4 @@ func TestHandler_ProvisionOnt(t *testing.T) {
 		t.Fatalf("ProvsionOnt should have failed but didn't")
 	}
 	fmt.Printf("ProvisionOnt success %v\n", ret)
-
 }

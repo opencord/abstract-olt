@@ -21,14 +21,8 @@ message AddChassisMessage{
    string VCoreIP =2;
    int32 VCorePort=3;
 }
-message Error {
-   int32 ErrorNum = 1;
-   string ErrorMessage=2;
-   int32 Serverity=3;
-}
 message AddChassisReturn{
    string DeviceID = 1;
-   Error error = 2;
 }
 message AddOLTChassisMessage{
    string CLLI=1;
@@ -55,14 +49,13 @@ message AddOLTChassisMessage{
 message AddOLTChassisReturn {
    string DeviceID =1;
    string ChassisDeviceID =2;
-   Error error = 3;
 }
 message ActivateSlotMessage{
-   string SlotDeviceID = 1;
+   string CLLI =1;
+   int32 SlotNumber = 2;
 }
 message ActivateSlotReturn{
    bool Success = 1;
-   Error error = 2;
 }
 message AddOntMessage{
    string CLLI=1;
@@ -73,7 +66,6 @@ message AddOntMessage{
 }
 message AddOntReturn{
    bool Success=1;
-   Error error = 2;
 }
 
 service AbstractOLT{
