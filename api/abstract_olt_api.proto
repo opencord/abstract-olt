@@ -65,8 +65,8 @@ message ActivateSlotReturn{
    Error error = 2;
 }
 message AddOntMessage{
-   string ChassisDeviceID=1;
-   string SlotDeviceID=2;
+   string CLLI=1;
+   int32 SlotNumber=2;
    int32 PortNumber=3;
    int32 OntNumber=4;
    string SerialNumber=5;
@@ -76,32 +76,31 @@ message AddOntReturn{
    Error error = 2;
 }
 
-service AddChassis{
+service AbstractOLT{
    rpc CreateChassis(AddChassisMessage) returns (AddChassisReturn) {
       option(google.api.http) = {
-         post: "/1/CreateAbstractChassis"
+         post: "/v1/CreateAbstractChassis"
 	 body:"*"
       };
    }
-}
 
-service AddOLTChassis {
    rpc CreateOLTChassis(AddOLTChassisMessage) returns (AddOLTChassisReturn) {
       option(google.api.http) = {
-         post: "/1/CreateOLTChassis"
+         post: "/v1/CreateOLTChassis"
 	 body:"*"
       };
    }
-}
-service ActivateSlot{
    rpc EnableSlot(ActivateSlotMessage) returns (ActivateSlotReturn){
       option(google.api.http) = {
-         post: "/1/EnableSlot"
+         post: "/v1/EnableSlot"
 	 body:"*"
       };
    }
-}
-service ActivateOnt {
-   rpc ProvisionOnt(AddOntMessage) returns (AddOntReturn) {}
+   rpc ProvisionOnt(AddOntMessage) returns (AddOntReturn) {
+      option(google.api.http) = {
+         post:"/v1/ProvsionOnt"
+	 body:"*"
+      };
+   }
 }
 

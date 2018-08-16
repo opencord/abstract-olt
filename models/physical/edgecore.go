@@ -29,6 +29,9 @@ CreateEdgecore takes simple olt struct and generates Edgecore OLT
 func CreateEdgecore(olt *SimpleOLT) *Edgecore {
 	var newPorts [16]PONPort
 	edge := Edgecore{SimpleOLT: *olt}
+	for i := 0; i < 16; i++ {
+		newPorts[i].Parent = &edge
+	}
 	edge.Ports = newPorts[:]
 	return &edge
 }

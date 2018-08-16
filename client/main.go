@@ -63,15 +63,14 @@ func main() {
 	}
 	defer conn.Close()
 
-	c := api.NewAddChassisClient(conn)
+	c := api.NewAbstractOLTClient(conn)
 
 	response, err := c.CreateChassis(context.Background(), &api.AddChassisMessage{CLLI: "my cilli", VCoreIP: "192.168.0.1", VCorePort: 9191})
 	if err != nil {
 		log.Fatalf("Error when calling SayHello: %s", err)
 	}
 	log.Printf("Response from server: %s", response.GetDeviceID())
-	d := api.NewAddOLTChassisClient(conn)
-	newResponse, err := d.CreateOLTChassis(context.Background(), &api.AddOLTChassisMessage{CLLI: "my cilli", SlotIP: "12.2.2.0", SlotPort: 9191, Hostname: "SlotOne", Type: api.AddOLTChassisMessage_edgecore})
+	newResponse, err := c.CreateOLTChassis(context.Background(), &api.AddOLTChassisMessage{CLLI: "my cilli", SlotIP: "12.2.2.0", SlotPort: 9191, Hostname: "SlotOne", Type: api.AddOLTChassisMessage_edgecore})
 	if err != nil {
 		debug.PrintStack()
 		log.Fatalf("Error when calling SayHello: %s", err)

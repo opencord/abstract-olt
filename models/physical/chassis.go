@@ -16,7 +16,10 @@
 
 package physical
 
-import "net"
+import (
+	"fmt"
+	"net"
+)
 
 /*
 Chassis is a model that takes up to 16 discreet OLT chassis as if it is a 16 slot OLT chassis
@@ -26,4 +29,17 @@ type Chassis struct {
 	VCoreAddress net.TCPAddr
 	Dataswitch   DataSwitch
 	Linecards    []OLT
+}
+
+/*
+AddOLTChassis - adds a reference to a new olt chassis
+*/
+func (chassis *Chassis) AddOLTChassis(olt OLT) {
+	chassis.Linecards = append(chassis.Linecards, olt)
+	//TODO - api call to add olt i.e. preprovision_olt
+	fmt.Printf("chassis.AddOLTChassis(%s)\n", olt.GetHostname())
+}
+func (chassis *Chassis) provisionONT(ont Ont) {
+	//TODO - api call to provison s/c vlans and ont serial number etc
+	fmt.Printf("chassis.provisionONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
 }

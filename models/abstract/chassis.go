@@ -16,6 +16,8 @@
 
 package abstract
 
+import "errors"
+
 const MAX_SLOTS int = 16
 const MAX_PORTS int = 16
 
@@ -33,4 +35,30 @@ type PortAllocationInfo struct {
 	slot       int
 	port       int
 	outOfPorts bool
+}
+
+func (chassis *Chassis) NextPort() (*Port, error) {
+	info := &chassis.AllocInfo
+
+	if info.outOfPorts {
+		return nil, errors.New("Abstract chassis out of ports")
+	}
+
+	nextPort := &chassis.Slots[info.slot].Ports[info.port]
+
+	info.port++
+	if info.port == MAX_PORTS {
+		info.port = 0
+		info.slot++
+		if info.slot == MAX_SLOTS {
+			info.slot = 0
+			info.outOfPorts = true
+		}
+	}
+
+	return nextPort, nil
+}
+func (chassis *Chassis) ActivateONT(slotNumber int, portNumber int, ontNumber int, serialNumber string) error {
+	err := chassis.Slots[slotNumber-1].Ports[portNumber].provisionOnt(ontNumber, serialNumber)
+	return err
 }

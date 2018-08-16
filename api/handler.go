@@ -17,6 +17,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -47,7 +48,7 @@ func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*Add
 		return &AddChassisReturn{DeviceID: chassis.CLLI}, nil
 	}
 	abstractChassis := abstract.GenerateChassis(clli)
-	phyChassis := &physical.Chassis{CLLI: clli}
+	phyChassis := &physical.Chassis{CLLI: clli, VCoreAddress: net.TCPAddr{IP: net.ParseIP(in.GetVCoreIP()), Port: int(in.GetVCorePort())}}
 	if settings.GetDebug() {
 		output := fmt.Sprintf("%v", abstractChassis)
 		formatted := strings.Replace(output, "{", "\n{", -1)
@@ -71,7 +72,7 @@ func (s *Server) CreateOLTChassis(ctx context.Context, in *AddOLTChassisMessage)
 	}
 	oltType := in.GetType()
 	address := net.TCPAddr{IP: net.ParseIP(in.GetSlotIP()), Port: int(in.GetSlotPort())}
-	sOlt := physical.SimpleOLT{CLLI: clli, Hostname: in.GetHostname(), Address: address}
+	sOlt := physical.SimpleOLT{CLLI: clli, Hostname: in.GetHostname(), Address: address, Parent: chassis}
 
 	var olt physical.OLT
 	switch oltType {
@@ -95,7 +96,7 @@ AddCard Adds an OLT card to an existing physical chassis, allocating ports
 in the physical card to those in the abstract model
 */
 func AddCard(physChassis *physical.Chassis, olt physical.OLT) error {
-	physChassis.Linecards = append(physChassis.Linecards, olt)
+	physChassis.AddOLTChassis(olt)
 
 	ports := olt.GetPorts()
 	absChassis := (*models.GetAbstractChassisMap())[physChassis.CLLI]
@@ -105,7 +106,28 @@ func AddCard(physChassis *physical.Chassis, olt physical.OLT) error {
 		absPort.PhysPort = &ports[i]
 		//AssignTraits(&ports[i], absPort)
 	}
-
 	//should probably worry about error at some point
 	return nil
+}
+
+/*
+EnableSlot - activates an OLT Chassis
+*/
+func (s *Server) EnableSlot(ctx context.Context, in *ActivateSlotMessage) (*ActivateSlotReturn, error) {
+	return nil, errors.New("garbage error")
+}
+
+/*
+ProvisionOnt provisions an ONT on a specific Chassis/LineCard/Port
+*/
+func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntReturn, error) {
+	absChassisMap := models.GetAbstractChassisMap()
+	clli := in.GetCLLI()
+	chassis := (*absChassisMap)[clli]
+	err := chassis.ActivateONT(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetPortNumber()), in.GetSerialNumber())
+
+	if err != nil {
+		return nil, err
+	}
+	return &AddOntReturn{Success: true}, nil
 }

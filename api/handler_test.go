@@ -21,10 +21,12 @@ import (
 	"testing"
 
 	"gerrit.opencord.org/abstract-olt/api"
+	"gerrit.opencord.org/abstract-olt/models/abstract"
 	"golang.org/x/net/context"
 )
 
 var clli string
+var slotHostname = "SlotOne"
 var ctx context.Context
 var server api.Server
 
@@ -41,12 +43,40 @@ func TestHandler_CreateChassis(t *testing.T) {
 
 }
 func TestHandler_CreateOLTChassis(t *testing.T) {
+	fmt.Println("in handlerTest_CreateChassis")
 	message := &api.AddOLTChassisMessage{CLLI: clli, SlotIP: "12.2.2.0", SlotPort: 9191,
-		Hostname: "SlotOne", Type: api.AddOLTChassisMessage_edgecore}
+		Hostname: slotHostname, Type: api.AddOLTChassisMessage_edgecore}
 	ret, err := server.CreateOLTChassis(ctx, message)
 	if err != nil {
 		t.Fatalf("CreateOLTChassis failed %v\n", err)
 	}
 	fmt.Printf("CreateOLTChassis success %v\n", ret)
+
+}
+func TestHandler_ProvisionOnt(t *testing.T) {
+	ctx = context.Background()
+	server = api.Server{}
+	fmt.Println("in handlerTest_CreateChassis")
+	// this one should succeed
+	message := &api.AddOntMessage{CLLI: clli, SlotNumber: 1, PortNumber: 3, OntNumber: 2, SerialNumber: "2033029402"}
+	ret, err := server.ProvisionOnt(ctx, message)
+	if err != nil {
+		t.Fatalf("ProvisionOnt failed %v\n", err)
+	}
+	// this one should fail
+	fmt.Println("here")
+	message = &api.AddOntMessage{CLLI: clli, SlotNumber: 2, PortNumber: 3, OntNumber: 2, SerialNumber: "2033029402"}
+	ret, err = server.ProvisionOnt(ctx, message)
+	if err != nil {
+		switch err.(type) {
+		case *abstract.UnprovisonedPortError:
+			fmt.Printf("ProvisionOnt failed as it should with %v\n", err)
+		default:
+			t.Fatalf("ProvsionOnt test failed with %v\n", err)
+		}
+	} else {
+		t.Fatalf("ProvsionOnt should have failed but didn't")
+	}
+	fmt.Printf("ProvisionOnt success %v\n", ret)
 
 }

@@ -16,7 +16,11 @@
 
 package abstract
 
-import "gerrit.opencord.org/abstract-olt/models/physical"
+import (
+	"fmt"
+
+	"gerrit.opencord.org/abstract-olt/models/physical"
+)
 
 /*
 Port represents a single PON port on the OLT chassis
@@ -27,4 +31,27 @@ type Port struct {
 	Onts     [64]Ont
 	PhysPort *physical.PONPort
 	Parent   *Slot `json:"-"`
+}
+
+type UnprovisonedPortError struct {
+	oltNum  int
+	clli    string
+	portNum int
+}
+
+func (e *UnprovisonedPortError) Error() string {
+	return fmt.Sprintf("Port %d for olt %d on AbstractChasis  %s is not provisioned", e.portNum, e.oltNum, e.clli)
+}
+func (port *Port) provisionOnt(ontNumber int, serialNumber string) error {
+	if port.PhysPort == nil {
+		slot := port.Parent
+		chassis := slot.Parent
+		err := UnprovisonedPortError{oltNum: slot.Number, clli: chassis.CLLI, portNum: port.Number}
+		return &err
+	}
+
+	phyPort := port.PhysPort
+	ont := port.Onts[ontNumber-1]
+	phyPort.ActivateOnt(ontNumber, ont.Svlan, ont.Cvlan, serialNumber)
+	return nil
 }

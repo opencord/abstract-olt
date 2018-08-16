@@ -17,11 +17,18 @@
 package physical
 
 /*
-Port represents a single PON port on the OLT chassis
+PONPort represents a single PON port on the OLT chassis
 */
 type PONPort struct {
 	Number   int
 	DeviceID string
 	Onts     [64]Ont
 	Parent   *Edgecore `json:"-"`
+}
+
+func (port *PONPort) ActivateOnt(number int, sVlan int, cVlan int, serialNumber string) {
+	ont := Ont{Number: number, Svlan: sVlan, Cvlan: cVlan, SerialNumber: serialNumber, Parent: port}
+	port.Onts[number-1] = ont
+	port.Parent.Parent.provisionONT(ont)
+
 }

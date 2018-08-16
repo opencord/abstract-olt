@@ -16,8 +16,6 @@
 
 package abstract
 
-import "errors"
-
 /*
 GenerateChassis - constructs a new AbstractOLT Chassis
 */
@@ -82,24 +80,3 @@ func calculateSvlan(slot int, port int, ont int) int {
 /*
 NextPort pulls the first unMapped port in the abstract chassis so the next physical port can be mapped to it
 */
-func (chassis *Chassis) NextPort() (*Port, error) {
-	info := &chassis.AllocInfo
-
-	if info.outOfPorts {
-		return nil, errors.New("Abstract chassis out of ports")
-	}
-
-	nextPort := &chassis.Slots[info.slot].Ports[info.port]
-
-	info.port++
-	if info.port == MAX_PORTS {
-		info.port = 0
-		info.slot++
-		if info.slot == MAX_SLOTS {
-			info.slot = 0
-			info.outOfPorts = true
-		}
-	}
-
-	return nextPort, nil
-}

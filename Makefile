@@ -25,7 +25,7 @@ CLIENT_PKG_BUILD := "${PKG}/client"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 
 
-.PHONY: all api server client
+.PHONY: all api server client test
 
 all: server client
 
@@ -43,7 +43,15 @@ api/abstract_olt_api.pb.gw.go :
 	--grpc-gateway_out=logtostderr=true:api \
 	 api/abstract_olt_api.proto
 
-api/xos.go:
+api/xos.pb.go:
+	@protoc -I seba-api/ \
+	   -I${GOPATH}/src \
+	  -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	  -I${GOPATH}/src/github.com/googleapis/google/api \
+	  -I${GOPATH}/src/github.com/googleapis/ \
+	  --go_out=plugins=grpc:seba-api \
+	  seba-api/xos.proto
+
 
 swagger:
 	@protoc -I api/ \

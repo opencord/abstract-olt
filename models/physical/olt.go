@@ -41,6 +41,7 @@ type SimpleOLT struct {
 	Address        net.TCPAddr
 	Number         int
 	Ports          []PONPort
+	Active         bool
 	Parent         *Chassis `json:"-"`
 	DataSwitchPort int
 }
