@@ -17,7 +17,6 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -111,23 +110,30 @@ func AddCard(physChassis *physical.Chassis, olt physical.OLT) error {
 }
 
 /*
-EnableSlot - activates an OLT Chassis
-*/
-func (s *Server) EnableSlot(ctx context.Context, in *ActivateSlotMessage) (*ActivateSlotReturn, error) {
-	return nil, errors.New("garbage error")
-}
-
-/*
 ProvisionOnt provisions an ONT on a specific Chassis/LineCard/Port
 */
 func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntReturn, error) {
 	absChassisMap := models.GetAbstractChassisMap()
 	clli := in.GetCLLI()
 	chassis := (*absChassisMap)[clli]
-	err := chassis.ActivateONT(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetPortNumber()), in.GetSerialNumber())
+	err := chassis.ActivateONT(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetOntNumber()), in.GetSerialNumber())
 
 	if err != nil {
 		return nil, err
 	}
 	return &AddOntReturn{Success: true}, nil
+}
+
+/*
+DeleteOnt - deletes a previously provision ont
+*/
+func (s *Server) DeleteOnt(ctx context.Context, in *DeleteOntMessage) (*DeleteOntReturn, error) {
+	absChassisMap := models.GetAbstractChassisMap()
+	clli := in.GetCLLI()
+	chassis := (*absChassisMap)[clli]
+	err := chassis.DeleteONT(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetOntNumber()), in.GetSerialNumber())
+	if err != nil {
+		return nil, err
+	}
+	return &DeleteOntReturn{Success: true}, nil
 }

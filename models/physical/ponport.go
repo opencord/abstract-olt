@@ -16,6 +16,8 @@
 
 package physical
 
+import "fmt"
+
 /*
 PONPort represents a single PON port on the OLT chassis
 */
@@ -26,9 +28,74 @@ type PONPort struct {
 	Parent   *Edgecore `json:"-"`
 }
 
-func (port *PONPort) ActivateOnt(number int, sVlan int, cVlan int, serialNumber string) {
+/*
+AllReadyActiveError - thrown when an attempt to activate a ONT which is already activated
+*/
+type AllReadyActiveError struct {
+	slotNum    int
+	clli       string
+	ponportNum int
+	ontNumber  int
+}
+
+/*
+Error - the interface method that must be implemented on error
+*/
+func (e *AllReadyActiveError) Error() string {
+	return fmt.Sprintf("Attempt to Activate ONT %d on PONPort %d Slot %d on %s but already active", e.ontNumber, e.ponportNum, e.slotNum, e.clli)
+}
+
+/*
+AllReadyDeactivatedError - thrown when an attempt to activate a ONT which is already activated
+*/
+type AllReadyDeactivatedError struct {
+	slotNum    int
+	clli       string
+	ponportNum int
+	ontNumber  int
+}
+
+/*
+Error - the interface method that must be implemented on error
+*/
+func (e *AllReadyDeactivatedError) Error() string {
+	return fmt.Sprintf("Attempt to De-Activate ONT %d on PONPort %d Slot %d on %s but not active", e.ontNumber, e.ponportNum, e.slotNum, e.clli)
+}
+
+/*
+ActivateOnt - passes ont information to chassis to make call to NEM to activate (whitelist) ont
+*/
+func (port *PONPort) ActivateOnt(number int, sVlan int, cVlan int, serialNumber string) error {
+	slot := port.Parent
+	chassis := slot.Parent
+	fmt.Printf("Calling ActivateOnt and port state is %t\n", port.Onts[number-1].Active)
+
+	if port.Onts[number-1].Active {
+		e := AllReadyActiveError{ontNumber: number, slotNum: slot.Number, ponportNum: port.Number, clli: chassis.CLLI}
+		return &e
+	}
 	ont := Ont{Number: number, Svlan: sVlan, Cvlan: cVlan, SerialNumber: serialNumber, Parent: port}
 	port.Onts[number-1] = ont
 	port.Parent.Parent.provisionONT(ont)
+	port.Onts[number-1].Active = true
+	return nil
 
+}
+
+/*
+DeleteOnt - passes ont information to chassis to make call to NEM to de-activate (de-whitelist) ont
+*/
+func (port *PONPort) DeleteOnt(number int, sVlan int, cVlan int, serialNumber string) error {
+	slot := port.Parent
+	chassis := slot.Parent
+	fmt.Printf("Calling ActivateOnt and port state is %t\n", port.Onts[number-1].Active)
+	if port.Onts[number-1].Active != true {
+		e := AllReadyDeactivatedError{ontNumber: number, slotNum: slot.Number, ponportNum: port.Number, clli: chassis.CLLI}
+		return &e
+	}
+	ont := Ont{Number: number, Svlan: sVlan, Cvlan: cVlan, SerialNumber: serialNumber, Parent: port}
+	chassis.deleteONT(ont)
+	port.Onts[number-1].Active = false
+
+	return nil
 }

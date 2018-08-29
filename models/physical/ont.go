@@ -25,4 +25,5 @@ type Ont struct {
 	Cvlan        int
 	SerialNumber string
 	Parent       *PONPort `json:"-"`
+	Active       bool
 }

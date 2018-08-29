@@ -43,7 +43,7 @@ func TestHandler_CreateChassis(t *testing.T) {
 	clli = ret.DeviceID
 }
 func TestHandler_CreateOLTChassis(t *testing.T) {
-	fmt.Println("in handlerTest_CreateChassis")
+	fmt.Println("in handlerTest_CreateOltChassis")
 	message := &api.AddOLTChassisMessage{CLLI: clli, SlotIP: "12.2.2.0", SlotPort: 9191,
 		Hostname: slotHostname, Type: api.AddOLTChassisMessage_edgecore}
 	ret, err := server.CreateOLTChassis(ctx, message)
@@ -52,43 +52,31 @@ func TestHandler_CreateOLTChassis(t *testing.T) {
 	}
 	fmt.Printf("CreateOLTChassis success %v\n", ret)
 }
-func TestHandler_EnableSlot(t *testing.T) {
-	ctx = context.Background()
-	server = api.Server{}
-	fmt.Println("in handler_test_EnableSlot")
-	// slot number 1 should be provisioned above
-	message := &api.ActivateSlotMessage{CLLI: clli, SlotNumber: 1}
-	ret, err := server.EnableSlot(ctx, message)
-	if err != nil {
-		t.Fatalf("EnableSlot failed with %v\n", err)
-	}
-	fmt.Printf("EnableSlot succeeded with %v\n", ret)
-	// Slot 2 isn't provisioned and should fail
-	message = &api.ActivateSlotMessage{CLLI: clli, SlotNumber: 2}
-	ret, err = server.EnableSlot(ctx, message)
-	if err != nil {
-		switch err.(type) {
-		case *physical.UnprovisionedSlotError:
-			fmt.Printf("EnableSlot failed as it should with %v\n", err)
-		default:
-			t.Fatalf("EnableSlot failed with %v\n", err)
-		}
-		t.Fatalf("EnableSlot should have failed but didn't")
-	}
-
-}
 func TestHandler_ProvisionOnt(t *testing.T) {
 	ctx = context.Background()
 	server = api.Server{}
-	fmt.Println("in handlerTest_CreateChassis")
+	fmt.Println("in handlerTest_ProvisonOnt")
 	// this one should succeed
 	message := &api.AddOntMessage{CLLI: clli, SlotNumber: 1, PortNumber: 3, OntNumber: 2, SerialNumber: "2033029402"}
 	ret, err := server.ProvisionOnt(ctx, message)
 	if err != nil {
 		t.Fatalf("ProvisionOnt failed %v\n", err)
 	}
+	// do it again on same ont/port should fail with AllReadyActiveError
+	ret, err = server.ProvisionOnt(ctx, message)
+	if err != nil {
+		switch err.(type) {
+		case *physical.AllReadyActiveError:
+			fmt.Printf("ProvisionOnt failed as it should with %v\n", err)
+		default:
+			t.Fatalf("ProvsionOnt test failed with %v\n", err)
+		}
+
+	} else {
+		t.Fatalf("ProvsionOnt should have failed with AllReadyActiveError but didn't")
+	}
+
 	// this one should fail
-	fmt.Println("here")
 	//SlotNumber 1 hasn't been provisioned
 	message = &api.AddOntMessage{CLLI: clli, SlotNumber: 2, PortNumber: 3, OntNumber: 2, SerialNumber: "2033029402"}
 	ret, err = server.ProvisionOnt(ctx, message)
@@ -103,4 +91,44 @@ func TestHandler_ProvisionOnt(t *testing.T) {
 		t.Fatalf("ProvsionOnt should have failed but didn't")
 	}
 	fmt.Printf("ProvisionOnt success %v\n", ret)
+}
+func TestHandler_DeleteOnt(t *testing.T) {
+	ctx = context.Background()
+	server = api.Server{}
+	fmt.Println("in handlerTest_DeleteOnt")
+	// this one should succeed
+	//De-Activate ONT 3 on PONPort 0 Slot 0 on my cilli but not active
+	message := &api.DeleteOntMessage{CLLI: clli, SlotNumber: 1, PortNumber: 3, OntNumber: 2, SerialNumber: "2033029402"}
+	ret, err := server.DeleteOnt(ctx, message)
+	if err != nil {
+		t.Fatalf("DeleteOnt failed %v\n", err)
+	}
+	// This should fail with AllReadyDeactivatedError
+	ret, err = server.DeleteOnt(ctx, message)
+	if err != nil {
+		switch err.(type) {
+		case *physical.AllReadyDeactivatedError:
+			fmt.Printf("DeleteOnt failed as expected with %v\n", err)
+		default:
+			t.Fatalf("DeleteOnt failed with %v\n", err)
+		}
+	} else {
+		t.Fatal("DeleteOnt should have failed with AllReadyDeactivatedError")
+	}
+
+	// this one should fail
+	//SlotNumber 1 hasn't been provisioned
+	message = &api.DeleteOntMessage{CLLI: clli, SlotNumber: 2, PortNumber: 3, OntNumber: 2, SerialNumber: "2033029402"}
+	ret, err = server.DeleteOnt(ctx, message)
+	if err != nil {
+		switch err.(type) {
+		case *abstract.UnprovisonedPortError:
+			fmt.Printf("DeleteOnt failed as it should with %v\n", err)
+		default:
+			t.Fatalf("DeleteOnt test failed with %v\n", err)
+		}
+	} else {
+		t.Fatalf("DeleteOnt should have failed but didn't")
+	}
+	fmt.Printf("DeletenOnt success %v\n", ret)
 }

@@ -50,13 +50,7 @@ message AddOLTChassisReturn {
    string DeviceID =1;
    string ChassisDeviceID =2;
 }
-message ActivateSlotMessage{
-   string CLLI =1;
-   int32 SlotNumber = 2;
-}
-message ActivateSlotReturn{
-   bool Success = 1;
-}
+
 message AddOntMessage{
    string CLLI=1;
    int32 SlotNumber=2;
@@ -68,6 +62,16 @@ message AddOntReturn{
    bool Success=1;
 }
 
+message DeleteOntMessage{
+   string CLLI=1;
+   int32 SlotNumber=2;
+   int32 PortNumber=3;
+   int32 OntNumber=4;
+   string SerialNumber=5;
+}
+message DeleteOntReturn{
+   bool Success=1;
+}
 service AbstractOLT{
    rpc CreateChassis(AddChassisMessage) returns (AddChassisReturn) {
       option(google.api.http) = {
@@ -75,16 +79,9 @@ service AbstractOLT{
 	 body:"*"
       };
    }
-
    rpc CreateOLTChassis(AddOLTChassisMessage) returns (AddOLTChassisReturn) {
       option(google.api.http) = {
          post: "/v1/CreateOLTChassis"
-	 body:"*"
-      };
-   }
-   rpc EnableSlot(ActivateSlotMessage) returns (ActivateSlotReturn){
-      option(google.api.http) = {
-         post: "/v1/EnableSlot"
 	 body:"*"
       };
    }
@@ -92,6 +89,12 @@ service AbstractOLT{
       option(google.api.http) = {
          post:"/v1/ProvsionOnt"
 	 body:"*"
+      };
+   }
+   rpc DeleteOnt(DeleteOntMessage) returns (DeleteOntReturn){
+      option(google.api.http)={
+        post:"/v1/DeleteOnt"
+	body:"*"
       };
    }
 }

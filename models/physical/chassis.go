@@ -51,6 +51,10 @@ func (chassis *Chassis) provisionONT(ont Ont) {
 	//TODO - api call to provison s/c vlans and ont serial number etc
 	fmt.Printf("chassis.provisionONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
 }
+func (chassis *Chassis) deleteONT(ont Ont) {
+	//TODO - api call to provison s/c vlans and ont serial number etc
+	fmt.Printf("chassis.deleteONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
+}
 func (chassis *Chassis) ActivateSlot(slotNumber int) error {
 	// AT&T backend systems start at 1 and not 0 :P
 	if chassis.Linecards[slotNumber-1] == nil {

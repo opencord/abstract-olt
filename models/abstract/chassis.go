@@ -62,3 +62,7 @@ func (chassis *Chassis) ActivateONT(slotNumber int, portNumber int, ontNumber in
 	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].provisionOnt(ontNumber, serialNumber)
 	return err
 }
+func (chassis *Chassis) DeleteONT(slotNumber int, portNumber int, ontNumber int, serialNumber string) error {
+	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].deleteOnt(ontNumber, serialNumber)
+	return err
+}
