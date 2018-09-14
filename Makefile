@@ -23,9 +23,9 @@ PKG	         := "gerrit.opencord.org/abstract-olt"
 SERVER_PKG_BUILD := "${PKG}/cmd/AbstractOLT"
 CLIENT_PKG_BUILD := "${PKG}/client"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
+DOCKERTAG ?= "latest"
 
-
-.PHONY: all api server client test
+.PHONY: all api server client test docker
 
 all: server client
 
@@ -78,6 +78,9 @@ clean: ## Remove previous builds
 test: all
 	@go test ./...
 	@go test ./... -cover
+
+docker: ## build docker image
+	@docker build -t opencord/abstract-olt:${DOCKERTAG} .
 
 help: ## Display this help screen
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

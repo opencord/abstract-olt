@@ -22,6 +22,7 @@ make api # generates grpc code and swagger files
 make server # compiles AbstractOLT into bin directory
 make client # compiles a test client which exercises some of the server api functions
 make all # builds everything
+make docker # builds a docker container with the AbstractOLT and client in /app
 ```
 ### Certificates
 Before running you will need to create a cert directory under bin and generate ssl certificates
