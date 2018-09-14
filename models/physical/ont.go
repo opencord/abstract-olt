@@ -26,4 +26,6 @@ type Ont struct {
 	SerialNumber string
 	Parent       *PONPort `json:"-"`
 	Active       bool
+	NasPortID    string
+	CircuitID    string
 }

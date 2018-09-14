@@ -16,7 +16,10 @@
 
 package abstract
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 const MAX_SLOTS int = 16
 const MAX_PORTS int = 16
@@ -27,6 +30,8 @@ Chassis is a model that takes up to 16 discreet OLT chassis as if it is a 16 slo
 type Chassis struct {
 	CLLI      string
 	Slots     [16]Slot
+	Rack      int
+	Shelf     int
 	AllocInfo PortAllocationInfo
 }
 
@@ -59,6 +64,7 @@ func (chassis *Chassis) NextPort() (*Port, error) {
 	return nextPort, nil
 }
 func (chassis *Chassis) ActivateONT(slotNumber int, portNumber int, ontNumber int, serialNumber string) error {
+	fmt.Printf("chassis.ActivateONT(slot:%d,portNumber:%d,ontNumber:%d,serialNumber:%s\n", slotNumber, portNumber, ontNumber, serialNumber)
 	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].provisionOnt(ontNumber, serialNumber)
 	return err
 }

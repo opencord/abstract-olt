@@ -19,8 +19,8 @@ package abstract
 /*
 GenerateChassis - constructs a new AbstractOLT Chassis
 */
-func GenerateChassis(CLLI string) *Chassis {
-	chassis := Chassis{CLLI: CLLI}
+func GenerateChassis(CLLI string, rack int, shelf int) *Chassis {
+	chassis := Chassis{CLLI: CLLI, Rack: rack, Shelf: shelf}
 
 	var slots [16]Slot
 	for i := 0; i < 16; i++ {
@@ -32,11 +32,11 @@ func GenerateChassis(CLLI string) *Chassis {
 }
 
 func generateSlot(n int, c *Chassis) Slot {
-	slot := Slot{Number: n, Parent: c}
+	slot := Slot{Number: n + 3, Parent: c}
 
 	var ports [16]Port
 	for i := 0; i < 16; i++ {
-		ports[i] = generatePort(i, &slot)
+		ports[i] = generatePort(i+1, &slot)
 	}
 
 	slot.Ports = ports
@@ -46,10 +46,11 @@ func generatePort(n int, s *Slot) Port {
 	port := Port{Number: n, Parent: s}
 
 	var onts [64]Ont
-	for i := 0; i < 64; i++ {
+	//i starts with 1 because :P Architects - blah
+	for i := 1; i < 65; i++ {
 		/* adding one because the system that provisions is 1 based on everything not 0 based*/
-		onts[i] = Ont{Number: i, Svlan: calculateSvlan(s.Number+1, n+1, i+1),
-			Cvlan: calculateCvlan(s.Number+1, n+1, i+1), Parent: &port}
+		onts[i-1] = Ont{Number: i, Svlan: calculateSvlan(s.Number, n, i),
+			Cvlan: calculateCvlan(s.Number, n, i+1), Parent: &port}
 	}
 
 	port.Onts = onts
@@ -61,8 +62,7 @@ func calculateCvlan(slot int, port int, ont int) int {
 	ontSlotOffset := 12  //= Max(ONT_PORT) = 12
 	vlanOffset := 1      //(VID 1 is reserved)
 
-	cVid := ((ont-1)%32)*ontPortOffset +
-		(slot-1)*ontSlotOffset + port + vlanOffset
+	cVid := ((ont-2)%32)*ontPortOffset + (slot-3)*ontSlotOffset + port + vlanOffset
 
 	return cVid
 }
@@ -71,8 +71,7 @@ func calculateSvlan(slot int, port int, ont int) int {
 	ltSlotOffset := 16
 	vlanGap := 288  // Max(LT_SLOT) * Max(ltSlotOffset) = 18 * 16 = 288
 	vlanOffset := 1 //(VID 1 is reserved)
-
-	sVid := ((slot-1)*ltSlotOffset + port) + ((ont-1)/32)*vlanGap + vlanOffset
+	sVid := ((slot-3)*ltSlotOffset + port) + ((ont-1)/32)*vlanGap + vlanOffset
 
 	return sVid
 }

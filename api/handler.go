@@ -17,6 +17,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -46,8 +47,8 @@ func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*Add
 	if chassis != nil {
 		return &AddChassisReturn{DeviceID: chassis.CLLI}, nil
 	}
-	abstractChassis := abstract.GenerateChassis(clli)
-	phyChassis := &physical.Chassis{CLLI: clli, VCoreAddress: net.TCPAddr{IP: net.ParseIP(in.GetVCoreIP()), Port: int(in.GetVCorePort())}}
+	abstractChassis := abstract.GenerateChassis(clli, int(in.GetRack()), int(in.GetShelf()))
+	phyChassis := &physical.Chassis{CLLI: clli, VCoreAddress: net.TCPAddr{IP: net.ParseIP(in.GetVCoreIP()), Port: int(in.GetVCorePort())}, Rack: int(in.GetRack()), Shelf: int(in.GetShelf())}
 	if settings.GetDebug() {
 		output := fmt.Sprintf("%v", abstractChassis)
 		formatted := strings.Replace(output, "{", "\n{", -1)
@@ -68,6 +69,8 @@ func (s *Server) CreateOLTChassis(ctx context.Context, in *AddOLTChassisMessage)
 	clli := in.GetCLLI()
 	chassis := (*phyChassisMap)[clli]
 	if chassis == nil {
+		errString := fmt.Sprintf("There is no chassis with CLLI of %s", clli)
+		return &AddOLTChassisReturn{DeviceID: "", ChassisDeviceID: ""}, errors.New(errString)
 	}
 	oltType := in.GetType()
 	address := net.TCPAddr{IP: net.ParseIP(in.GetSlotIP()), Port: int(in.GetSlotPort())}
@@ -80,12 +83,10 @@ func (s *Server) CreateOLTChassis(ctx context.Context, in *AddOLTChassisMessage)
 	case AddOLTChassisMessage_adtran:
 	case AddOLTChassisMessage_tibit:
 	}
-
 	err := AddCard(chassis, olt)
 	if err != nil {
 		//TODO do something
 	}
-
 	return &AddOLTChassisReturn{DeviceID: in.GetHostname(), ChassisDeviceID: clli}, nil
 
 }
@@ -102,6 +103,7 @@ func AddCard(physChassis *physical.Chassis, olt physical.OLT) error {
 
 	for i := 0; i < len(ports); i++ {
 		absPort, _ := absChassis.NextPort()
+
 		absPort.PhysPort = &ports[i]
 		//AssignTraits(&ports[i], absPort)
 	}
@@ -116,6 +118,10 @@ func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntRe
 	absChassisMap := models.GetAbstractChassisMap()
 	clli := in.GetCLLI()
 	chassis := (*absChassisMap)[clli]
+	if chassis == nil {
+		errString := fmt.Sprintf("There is no chassis with CLLI of %s", clli)
+		return &AddOntReturn{Success: false}, errors.New(errString)
+	}
 	err := chassis.ActivateONT(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetOntNumber()), in.GetSerialNumber())
 
 	if err != nil {

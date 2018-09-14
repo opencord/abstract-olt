@@ -49,15 +49,22 @@ func (e *UnprovisonedPortError) Error() string {
 	return fmt.Sprintf("Port %d for olt %d on AbstractChasis  %s is not provisioned", e.portNum, e.oltNum, e.clli)
 }
 func (port *Port) provisionOnt(ontNumber int, serialNumber string) error {
+
+	fmt.Printf("My Number:%d abstract.port.provisionOnt(ontNumber:%d,serialNumber:%s\n", port.Number, ontNumber, serialNumber)
+	slot := port.Parent
+	chassis := *slot.Parent
+	baseID := fmt.Sprintf("%d/%d/%d/%d:%d.1.1", chassis.Rack, chassis.Shelf, slot.Number, port.Number, ontNumber)
+	nasPortID := fmt.Sprintf("PON %s", baseID)
+	circuitID := fmt.Sprintf("%s %s", chassis.CLLI, baseID)
+
 	if port.PhysPort == nil {
-		slot := port.Parent
 		chassis := slot.Parent
 		err := UnprovisonedPortError{oltNum: slot.Number, clli: chassis.CLLI, portNum: port.Number}
 		return &err
 	}
 	phyPort := port.PhysPort
 	ont := port.Onts[ontNumber-1]
-	err := phyPort.ActivateOnt(ontNumber, ont.Svlan, ont.Cvlan, serialNumber)
+	err := phyPort.ActivateOnt(ontNumber, ont.Svlan, ont.Cvlan, serialNumber, nasPortID, circuitID)
 	return err
 }
 func (port *Port) deleteOnt(ontNumber int, serialNumber string) error {

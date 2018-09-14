@@ -20,6 +20,8 @@ message AddChassisMessage{
    string CLLI =1;
    string VCoreIP =2;
    int32 VCorePort=3;
+   int32 Rack=4;
+   int32 Shelf=5;
 }
 message AddChassisReturn{
    string DeviceID = 1;
@@ -32,7 +34,7 @@ message AddOLTChassisMessage{
    fixed32 NumPorts = 5;
    bool Activate = 6;
    enum OltDriver {
-      openoltDriver = 0;
+      openoltDriver= 0;
       asfvolt16Driver=1;
       adtranDriver=2;
       tibitsDriver=3;

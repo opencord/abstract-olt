@@ -16,7 +16,9 @@
 
 package physical
 
-import "fmt"
+import (
+	"fmt"
+)
 
 /*
 PONPort represents a single PON port on the OLT chassis
@@ -65,7 +67,7 @@ func (e *AllReadyDeactivatedError) Error() string {
 /*
 ActivateOnt - passes ont information to chassis to make call to NEM to activate (whitelist) ont
 */
-func (port *PONPort) ActivateOnt(number int, sVlan int, cVlan int, serialNumber string) error {
+func (port *PONPort) ActivateOnt(number int, sVlan int, cVlan int, serialNumber string, nasPortID string, circuitID string) error {
 	slot := port.Parent
 	chassis := slot.Parent
 	fmt.Printf("Calling ActivateOnt and port state is %t\n", port.Onts[number-1].Active)
@@ -74,7 +76,7 @@ func (port *PONPort) ActivateOnt(number int, sVlan int, cVlan int, serialNumber 
 		e := AllReadyActiveError{ontNumber: number, slotNum: slot.Number, ponportNum: port.Number, clli: chassis.CLLI}
 		return &e
 	}
-	ont := Ont{Number: number, Svlan: sVlan, Cvlan: cVlan, SerialNumber: serialNumber, Parent: port}
+	ont := Ont{Number: number, Svlan: sVlan, Cvlan: cVlan, SerialNumber: serialNumber, Parent: port, NasPortID: nasPortID, CircuitID: circuitID}
 	port.Onts[number-1] = ont
 	port.Parent.Parent.provisionONT(ont)
 	port.Onts[number-1].Active = true

@@ -41,7 +41,7 @@ func TestSerialize(t *testing.T) {
 }
 
 func generateTestChassis() *abstract.Chassis {
-	chassis := abstract.GenerateChassis("My_CLLI")
+	chassis := abstract.GenerateChassis("My_CLLI", 1, 1)
 
 	var slots [16]abstract.Slot
 	for i := 0; i < 16; i++ {

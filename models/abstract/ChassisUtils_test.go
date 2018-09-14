@@ -23,17 +23,16 @@ import (
 )
 
 func TestChassisUtils_GenerateChassis(t *testing.T) {
-	chassis := abstract.GenerateChassis("MY_CLLI")
+	chassis := abstract.GenerateChassis("MY_CLLI", 1, 1)
 	slot := chassis.Slots[6]
 	port := slot.Ports[0]
 	ont := port.Onts[3]
 	svlan := ont.Svlan
 	cvlan := ont.Cvlan
 	if svlan != 98 { // see map doc
-		t.Fail()
+		t.Errorf("SVlan should be 98 and is %d\n", svlan)
 	}
 	if cvlan != 434 { // see map doc
-		t.Fail()
+		t.Errorf("CVlan should be 434 and is %d\n", cvlan)
 	}
-
 }

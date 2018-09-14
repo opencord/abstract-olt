@@ -19,6 +19,10 @@ package physical
 import (
 	"fmt"
 	"net"
+	"net/http"
+	"strings"
+
+	"gerrit.opencord.org/abstract-olt/models/tosca"
 )
 
 /*
@@ -29,6 +33,8 @@ type Chassis struct {
 	VCoreAddress net.TCPAddr
 	Dataswitch   DataSwitch
 	Linecards    []OLT
+	Rack         int
+	Shelf        int
 }
 type UnprovisionedSlotError struct {
 	CLLI       string
@@ -46,10 +52,59 @@ func (chassis *Chassis) AddOLTChassis(olt OLT) {
 	chassis.Linecards = append(chassis.Linecards, olt)
 	//TODO - api call to add olt i.e. preprovision_olt
 	fmt.Printf("chassis.AddOLTChassis(%s)\n", olt.GetHostname())
+	//S>103 func NewOltProvision(name string, deviceType string, host string, port int) OltProvsion {
+	ipString := olt.GetAddress().IP.String()
+	webServerPort := olt.GetAddress().Port
+	oltStruct := tosca.NewOltProvision(chassis.CLLI, olt.GetHostname(), "openolt", ipString, webServerPort)
+	yaml, _ := oltStruct.ToYaml()
+	fmt.Printf("yaml:%s\n", yaml)
+	client := &http.Client{}
+	requestList := fmt.Sprintf("http://%s:%d/run", chassis.VCoreAddress.IP.String(), chassis.VCoreAddress.Port)
+	req, err := http.NewRequest("POST", requestList, strings.NewReader(yaml))
+	req.Header.Add("xos-username", "admin@opencord.org")
+	req.Header.Add("xos-password", "letmein")
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("ERROR :) %v\n", err)
+		// handle error
+	}
+	fmt.Printf("Response is %v\n", resp)
+
 }
 func (chassis *Chassis) provisionONT(ont Ont) {
 	//TODO - api call to provison s/c vlans and ont serial number etc
 	fmt.Printf("chassis.provisionONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
+	ponPort := ont.Parent
+	slot := ponPort.Parent
+
+	//func NewOntProvision(serialNumber string, oltIP net.IP, ponPortNumber int) OntProvision {
+	ontStruct := tosca.NewOntProvision(ont.SerialNumber, slot.Address.IP, ponPort.Number)
+	yaml, _ := ontStruct.ToYaml()
+
+	fmt.Printf("yaml:%s\n", yaml)
+	client := &http.Client{}
+	requestList := fmt.Sprintf("http://%s:%d/run", chassis.VCoreAddress.IP.String(), chassis.VCoreAddress.Port)
+	req, err := http.NewRequest("POST", requestList, strings.NewReader(yaml))
+	req.Header.Add("xos-username", "admin@opencord.org")
+	req.Header.Add("xos-password", "letmein")
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("ERROR :) %v\n", err)
+		// handle error
+	}
+	fmt.Printf("Response is %v\n", resp)
+	rgName := fmt.Sprintf("%s_%d_%d_%d_RG", chassis.CLLI, slot.Number, ponPort.Number, ont.Number)
+	subStruct := tosca.NewSubscriberProvision(rgName, ont.Cvlan, ont.Svlan, ont.SerialNumber, ont.NasPortID, ont.CircuitID, chassis.CLLI)
+	yaml, _ = subStruct.ToYaml()
+	fmt.Printf("yaml:%s\n", yaml)
+	req, err = http.NewRequest("POST", requestList, strings.NewReader(yaml))
+	req.Header.Add("xos-username", "admin@opencord.org")
+	req.Header.Add("xos-password", "letmein")
+	resp, err = client.Do(req)
+	if err != nil {
+		fmt.Printf("ERROR :) %v\n", err)
+		// handle error
+	}
 }
 func (chassis *Chassis) deleteONT(ont Ont) {
 	//TODO - api call to provison s/c vlans and ont serial number etc
