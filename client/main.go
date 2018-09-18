@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"runtime/debug"
+	"strings"
 
 	"gerrit.opencord.org/abstract-olt/api"
 	"google.golang.org/grpc"
@@ -29,6 +30,8 @@ import (
 )
 
 func main() {
+	echo := flag.Bool("e", false, "echo")
+	message := flag.String("message", "ping", "message to be echoed back")
 	create := flag.Bool("c", false, "create?")
 	addOlt := flag.Bool("s", false, "addOlt?")
 	provOnt := flag.Bool("o", false, "provisionOnt?")
@@ -46,30 +49,56 @@ func main() {
 	port := flag.Uint("port", 1, "port number 1-16 to provision ont to")
 	ont := flag.Uint("ont", 1, "ont number 1-64")
 	serial := flag.String("serial", "", "serial number of ont")
+	useSsl := flag.Bool("ssl", false, "use ssl")
+	useAuth := flag.Bool("auth", false, "use auth")
+	crtFile := flag.String("cert", "cert/server.crt", "Public cert for server to establish tls session")
+	serverAddressPort := flag.String("server", "localhost:7777", "address and port of AbstractOLT server")
+	fqdn := flag.String("fqdn", "", "FQDN of the service to match what is in server.crt")
 
 	flag.Parse()
+	if *useSsl {
+		if *fqdn == "" {
+			fqdn = &(strings.Split(*serverAddressPort, ":")[0])
+			fmt.Printf("using %s as the FQDN for the AbstractOLT server", *fqdn)
+		}
+	}
 
-	if (*create && *addOlt) || (*create && *provOnt) || (*addOlt && *provOnt) {
+	if (*echo && *addOlt) || (*echo && *create) || (*echo && *provOnt) || (*create && *addOlt) || (*create && *provOnt) || (*addOlt && *provOnt) {
 		fmt.Println("You can only call one method at a time")
 		usage()
 		return
 	}
-	if !(*create || *provOnt || *addOlt) {
+	if !(*create || *provOnt || *addOlt || *echo) {
 		fmt.Println("You didn't specify an operation to perform")
 		usage()
 		return
 	}
 	var conn *grpc.ClientConn
-	creds, err := credentials.NewClientTLSFromFile("cert/server.crt", "AbstractOLT.dev.atl.foundry.att.com")
-	if err != nil {
-		log.Fatalf("could not load tls cert: %s", err)
-	}
+	var err error
+
 	// Setup the login/pass
 	auth := Authentication{
 		Login:    "john",
 		Password: "doe",
 	}
-	conn, err = grpc.Dial(":7777", grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&auth))
+	if *useSsl && *useAuth {
+
+		creds, err := credentials.NewClientTLSFromFile(*crtFile, *fqdn)
+		conn, err = grpc.Dial(*serverAddressPort, grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&auth))
+		if err != nil {
+			log.Fatalf("could not load tls cert: %s", err)
+		}
+	} else if *useSsl {
+		creds, err := credentials.NewClientTLSFromFile("cert/server.crt", *fqdn)
+		conn, err = grpc.Dial(*serverAddressPort, grpc.WithTransportCredentials(creds))
+		if err != nil {
+			log.Fatalf("could not load tls cert: %s", err)
+		}
+	} else if *useAuth {
+		conn, err = grpc.Dial(*serverAddressPort, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
+	} else {
+		conn, err = grpc.Dial(*serverAddressPort, grpc.WithInsecure())
+	}
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
@@ -82,10 +111,10 @@ func main() {
 		addOltChassis(c, clli, oltAddress, oltPort, name, driver, oltType)
 	} else if *provOnt {
 		provisionONT(c, clli, slot, port, ont, serial)
-	} else {
+	} else if *echo {
+		ping(c, *message)
 	}
 
-	fmt.Println("TODO - Do something")
 }
 
 // Authentication holds the login/password
@@ -105,6 +134,15 @@ func (a *Authentication) GetRequestMetadata(context.Context, ...string) (map[str
 // RequireTransportSecurity indicates whether the credentials requires transport security
 func (a *Authentication) RequireTransportSecurity() bool {
 	return true
+}
+func ping(c api.AbstractOLTClient, message string) error {
+	response, err := c.Echo(context.Background(), &api.EchoMessage{Ping: message})
+	if err != nil {
+		fmt.Printf("Error when calling Echo: %s", err)
+		return err
+	}
+	log.Printf("Response from server: %s", response.GetPong())
+	return nil
 }
 
 func createChassis(c api.AbstractOLTClient, clli *string, xosAddress *string, xosPort *uint, rack *uint, shelf *uint) error {
@@ -169,8 +207,15 @@ func provisionONT(c api.AbstractOLTClient, clli *string, slot *uint, port *uint,
 }
 func usage() {
 	var output = `
-   Usage ./client -[methodFlag] params
-   methFlags:
+	Usage ./client -server=[serverAddress:port] -[methodFlag] params
+	./client -ssl -fqdn=FQDN_OF_ABSTRACT_OLT_SERVER.CRT -cert PATH_TO_SERVER.CRT -server=[serverAddress:port] -[methodFlag] params : use ssl
+	./client -auth -server=[serverAddress:port] -[methodFlag] params : Authenticate session
+
+   methodFlags:
+   -e echo # used to test connectivity to server NOOP
+      params:
+	 -message string to be echoed back from the server
+	 e.g. ./client -server=localhost:7777 -e -message MESSAGE_TO_BE_ECHOED
    -c create chassis
       params:
          -clli CLLI_NAME
@@ -178,7 +223,7 @@ func usage() {
 	 -xos_port XOS_TOSCA_LISTEN_PORT
 	 -rack [optional default 1]
 	 -shelf [optional default 1]
-   e.g. ./client -c -clli MY_CLLI -xos_address 192.168.0.1 -xos_port 30007 -rack 1 -shelf 1
+	 e.g. ./client -server=localhost:7777 -c -clli MY_CLLI -xos_address 192.168.0.1 -xos_port 30007 -rack 1 -shelf 1
    -s add physical olt chassis to chassis
       params:
          -clli CLLI_NAME - identifies abstract chassis to assign olt chassis to
@@ -187,7 +232,7 @@ func usage() {
 	 -name - OLT_NAME internal human readable name to identify OLT_CHASSIS
 	 -driver [openolt,asfvolt16,adtran,tibits] - used to tell XOS which driver should be used to manange chassis
 	 -type [edgecore,adtran,tibit] - used to tell AbstractOLT how many ports are available on olt chassis
-   e.g. ./client -s -clli MY_CLLI -olt_address 192.168.1.100 -olt_port=9191 -name=slot1 -driver=openolt -type=adtran
+	 e.g. ./client -server abstractOltHost:7777 -s -clli MY_CLLI -olt_address 192.168.1.100 -olt_port=9191 -name=slot1 -driver=openolt -type=adtran
    -o provision ont - adds ont to whitelist in XOS  on a specific port on a specific olt chassis based on abstract -> phyisical mapping
       params:
 	 -clli CLLI_NAME
@@ -195,7 +240,7 @@ func usage() {
 	 -port OLT_PORT_NUMBER [1-16]
 	 -ont ONT_NUMBER [1-64]
 	 -serial ONT_SERIAL_NUM
-	e.g. ./client -o -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf `
+	 e.g. ./client -server=localhost:7777 -o -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf `
 
 	fmt.Println(output)
 }

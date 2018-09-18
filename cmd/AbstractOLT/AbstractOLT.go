@@ -37,6 +37,10 @@ import (
 // private type for Context keys
 type contextKey int
 
+var useSsl *bool
+var useAuthentication *bool
+var certDirectory *string
+
 const (
 	clientIDKey contextKey = iota
 )
@@ -53,6 +57,7 @@ func credMatcher(headerName string) (mdName string, ok bool) {
 
 // authenticateAgent check the client credentials
 func authenticateClient(ctx context.Context, s *api.Server) (string, error) {
+	//TODO if we decide to handle Authentication with AbstractOLT this will need to be bound to an authentication service
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		clientLogin := strings.Join(md["login"], "")
 		clientPassword := strings.Join(md["password"], "")
@@ -86,9 +91,13 @@ func unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServ
 }
 
 func startGRPCServer(address, certFile, keyFile string) error {
+	if settings.GetDebug() {
+		log.Printf("startGRPCServer(LisenAddress:%s,CertFile:%s,KeyFile:%s\n", address, certFile, keyFile)
+	}
 	// create a listener on TCP port
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
+		log.Printf("startGRPCServer failed to start with %v\n", err)
 		return fmt.Errorf("failed to listen: %v", err)
 	}
 
@@ -102,8 +111,17 @@ func startGRPCServer(address, certFile, keyFile string) error {
 	}
 
 	// Create an array of gRPC options with the credentials
-	opts := []grpc.ServerOption{grpc.Creds(creds),
-		grpc.UnaryInterceptor(unaryInterceptor)}
+	var opts []grpc.ServerOption
+	if *useSsl && *useAuthentication {
+		opts = []grpc.ServerOption{grpc.Creds(creds),
+			grpc.UnaryInterceptor(unaryInterceptor)}
+	} else if *useAuthentication {
+		opts = []grpc.ServerOption{grpc.UnaryInterceptor(unaryInterceptor)}
+	} else if *useSsl {
+		opts = []grpc.ServerOption{grpc.Creds(creds)}
+	} else {
+		opts = []grpc.ServerOption{}
+	}
 
 	// create a gRPC server object
 	grpcServer := grpc.NewServer(opts...)
@@ -120,11 +138,19 @@ func startGRPCServer(address, certFile, keyFile string) error {
 	return nil
 }
 func startRESTServer(address, grpcAddress, certFile string) error {
+	if settings.GetDebug() {
+		log.Printf("startRESTServer(Address:%s, GRPCAddress:%s,Cert File:%s\n", address, grpcAddress, certFile)
+	}
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+	var mux *runtime.ServeMux
 
-	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(credMatcher))
+	if *useAuthentication {
+		mux = runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(credMatcher))
+	} else {
+		mux = runtime.NewServeMux()
+	}
 	creds, err := credentials.NewClientTLSFromFile(certFile, "")
 	if err != nil {
 		return fmt.Errorf("could not load TLS certificate: %s", err)
@@ -144,21 +170,51 @@ func startRESTServer(address, grpcAddress, certFile string) error {
 }
 func main() {
 	debugPtr := flag.Bool("d", false, "Log Level Debug")
-	flag.Parse()
-	settings.SetDebug(*debugPtr)
+	useAuthentication = flag.Bool("a", false, "Use Authentication")
+	useSsl = flag.Bool("s", false, "Use SSL")
+	certDirectory = flag.String("cert_dir", "cert", "Directory where key files exist")
+	listenAddress := flag.String("listenAddress", "localhost", "IP Address to listen on")
+	grpcPort := flag.String("grpc_port", "7777", "Port to listen for GRPC")
+	restPort := flag.String("rest_port", "7778", "Port to listen for Rest Server")
+	logFile := flag.String("log_file", "AbstractOLT.log", "Name of the LogFile to write to")
+	h := flag.Bool("h", false, "Show usage")
+	help := flag.Bool("help", false, "Show usage")
 
-	file, err := os.OpenFile("AbstractOLT.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	flag.Parse()
+
+	if *help || *h {
+		var usage = `./AbstractOLT -d [default false] : Runs in Debug mode
+Params:
+      -s [default false] -cert_dir [default $WORKING_DIR/cert]  DIR : Runs in SSL mode with server.crt and server.key found in  DIR
+      -a [default false] : Run in Authentication mode currently very basic
+      -listenAddress IP_ADDRESS [default localhost] -grpc_port [default 7777] PORT1 -rest_port [default 7778] PORT2: Listen for grpc on IP_ADDRESS:PORT1 and rest on IP_ADDRESS:PORT2
+      -log_file [default $WORKING_DIR/AbstractOLT.log] LOG_FILE
+      -h(elp) print this usage
+`
+		fmt.Println(usage)
+		return
+	}
+	settings.SetDebug(*debugPtr)
+	fmt.Println("Startup Params: debug:", *debugPtr, " Authentication:", *useAuthentication, " SSL:", *useSsl, "Cert Directory", *certDirectory,
+		"ListenAddress:", *listenAddress, " grpc port:", *grpcPort, " rest port:", *restPort, "Logging to ", *logFile)
+
+	file, err := os.OpenFile(*logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open log file", file, ":", err)
 	}
 	log.SetOutput(file)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
 	log.Printf("Setting Debug to %t\n", settings.GetDebug())
+	if settings.GetDebug() {
+		log.Println("Startup Params: debug:", *debugPtr, " Authentication:", *useAuthentication, " SSL:", *useSsl, "Cert Directory", *certDirectory,
+			"ListenAddress:", *listenAddress, " grpc port:", *grpcPort, " rest port:", *restPort, "Logging to ", *logFile)
+	}
 
-	grpcAddress := fmt.Sprintf("%s:%d", "AbstractOLT.dev.atl.foundry.att.com", 7777)
-	restAddress := fmt.Sprintf("%s:%d", "AbstractOLT.dev.atl.foundry.att.com", 7778)
-	certFile := "cert/server.crt"
-	keyFile := "cert/server.key"
+	grpcAddress := fmt.Sprintf("%s:%s", *listenAddress, *grpcPort)
+	restAddress := fmt.Sprintf("%s:%s", *listenAddress, *restPort)
+
+	certFile := fmt.Sprintf("%s/server.crt", *certDirectory)
+	keyFile := fmt.Sprintf("%s/server.key", *certDirectory)
 
 	// fire the gRPC server in a goroutine
 	go func() {
@@ -179,5 +235,6 @@ func main() {
 	// infinite loop
 	log.Printf("Entering infinite loop")
 	select {}
+	//TODO publish periodic stats etc
 	fmt.Println("AbstractOLT")
 }

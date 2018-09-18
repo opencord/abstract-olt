@@ -16,6 +16,13 @@ syntax = "proto3";
 package api;
 import "google/api/annotations.proto";
 
+message EchoMessage{
+   string Ping =1;
+}
+message EchoReplyMessage{
+   string Pong =1;
+}
+
 message AddChassisMessage{
    string CLLI =1;
    string VCoreIP =2;
@@ -75,6 +82,12 @@ message DeleteOntReturn{
    bool Success=1;
 }
 service AbstractOLT{
+   rpc Echo(EchoMessage) returns (EchoReplyMessage){
+      option(google.api.http)={
+        post:"/v1/Echo"
+	body:"*"
+      };
+   }
    rpc CreateChassis(AddChassisMessage) returns (AddChassisReturn) {
       option(google.api.http) = {
          post: "/v1/CreateAbstractChassis"

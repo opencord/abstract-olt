@@ -36,6 +36,12 @@ Server instance of the grpc server
 type Server struct {
 }
 
+func (s *Server) Echo(ctx context.Context, in *EchoMessage) (*EchoReplyMessage, error) {
+	ping := in.GetPing()
+	pong := EchoReplyMessage{Pong: ping}
+	return &pong, nil
+}
+
 /*
 CreateChassis - allocates a new Chassis struct and stores it in chassisMap
 */
