@@ -18,10 +18,12 @@ package physical
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"strings"
 
+	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
 	"gerrit.opencord.org/abstract-olt/models/tosca"
 )
 
@@ -57,7 +59,11 @@ func (chassis *Chassis) AddOLTChassis(olt OLT) {
 	webServerPort := olt.GetAddress().Port
 	oltStruct := tosca.NewOltProvision(chassis.CLLI, olt.GetHostname(), "openolt", ipString, webServerPort)
 	yaml, _ := oltStruct.ToYaml()
-	fmt.Printf("yaml:%s\n", yaml)
+	if settings.GetDummy() {
+		log.Printf("yaml:%s\n", yaml)
+		log.Println("YAML IS NOT BEING SET TO XOS")
+		return
+	}
 	client := &http.Client{}
 	requestList := fmt.Sprintf("http://%s:%d/run", chassis.VCoreAddress.IP.String(), chassis.VCoreAddress.Port)
 	req, err := http.NewRequest("POST", requestList, strings.NewReader(yaml))
@@ -81,7 +87,11 @@ func (chassis *Chassis) provisionONT(ont Ont) {
 	ontStruct := tosca.NewOntProvision(ont.SerialNumber, slot.Address.IP, ponPort.Number)
 	yaml, _ := ontStruct.ToYaml()
 
-	fmt.Printf("yaml:%s\n", yaml)
+	if settings.GetDummy() {
+		log.Printf("yaml:%s\n", yaml)
+		log.Println("YAML IS NOT BEING SET TO XOS")
+		return
+	}
 	client := &http.Client{}
 	requestList := fmt.Sprintf("http://%s:%d/run", chassis.VCoreAddress.IP.String(), chassis.VCoreAddress.Port)
 	req, err := http.NewRequest("POST", requestList, strings.NewReader(yaml))

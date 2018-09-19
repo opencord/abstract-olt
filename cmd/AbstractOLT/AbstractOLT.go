@@ -179,8 +179,10 @@ func main() {
 	logFile := flag.String("log_file", "AbstractOLT.log", "Name of the LogFile to write to")
 	h := flag.Bool("h", false, "Show usage")
 	help := flag.Bool("help", false, "Show usage")
+	dummy := flag.Bool("dummy", false, "Run in dummy mode where YAML is not sent to XOS")
 
 	flag.Parse()
+	settings.SetDummy(*dummy)
 
 	if *help || *h {
 		var usage = `./AbstractOLT -d [default false] : Runs in Debug mode
@@ -204,6 +206,10 @@ Params:
 	}
 	log.SetOutput(file)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
+	if *dummy {
+		fmt.Println("RUNNING IN DUMMY MODE NO YAML WILL BE SENT TO XOS")
+		log.Println("RUNNING IN DUMMY MODE NO YAML WILL BE SENT TO XOS")
+	}
 	log.Printf("Setting Debug to %t\n", settings.GetDebug())
 	if settings.GetDebug() {
 		log.Println("Startup Params: debug:", *debugPtr, " Authentication:", *useAuthentication, " SSL:", *useSsl, "Cert Directory", *certDirectory,

@@ -17,6 +17,7 @@
 package settings
 
 var debug = false
+var dummy = false
 
 /*
 SetDebug - sets debug setting
@@ -30,4 +31,18 @@ GetDebug returns debug setting
 */
 func GetDebug() bool {
 	return debug
+}
+
+/*
+SetDummy sets dummy mode
+*/
+func SetDummy(dummyMode bool) {
+	dummy = dummyMode
+}
+
+/*
+GetDummy - returns the current value of dummy
+*/
+func GetDummy() bool {
+	return dummy
 }
