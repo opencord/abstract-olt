@@ -16,7 +16,6 @@
 package tosca_test
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -47,6 +46,8 @@ topology_template:
         outer_tpid: "0x8100"
         uplink: "65536"
         nas_id: my_clli
+        switch_datapath_id: of:0000000000000001
+        switch_port: "1"
       requirements:
       - volt_service:
           node: service#volt
@@ -56,9 +57,7 @@ topology_template:
 var olt tosca.OltProvsion
 
 func TestAddOlt_NewOltProvsion(t *testing.T) {
-	fmt.Println("In TestAddOlt_NewOltProvsion")
 	olt = tosca.NewOltProvision("my_clli", "myName", "openolt", "192.168.1.1", 9191)
-	fmt.Printf("%v\n\n", olt)
 }
 
 func TestAddOlt_ToYaml(t *testing.T) {
@@ -70,10 +69,4 @@ func TestAddOlt_ToYaml(t *testing.T) {
 	if x != 0 {
 		t.Fatal("ToYaml didn't produce the expected yaml")
 	}
-	fmt.Printf("Compare is %d\n", x)
-
-	fmt.Printf(y)
-	fmt.Println("******")
-	fmt.Print(output)
-	fmt.Println("******")
 }

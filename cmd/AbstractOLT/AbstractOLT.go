@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -27,6 +28,7 @@ import (
 
 	"gerrit.opencord.org/abstract-olt/api"
 	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
+	"gerrit.opencord.org/abstract-olt/models"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -96,28 +98,27 @@ func startGRPCServer(address, certFile, keyFile string) error {
 	}
 	// create a listener on TCP port
 	lis, err := net.Listen("tcp", address)
-	if err != nil {
-		log.Printf("startGRPCServer failed to start with %v\n", err)
-		return fmt.Errorf("failed to listen: %v", err)
-	}
 
 	// create a server instance
 	s := api.Server{}
 
 	// Create the TLS credentials
-	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
-	if err != nil {
-		return fmt.Errorf("could not load TLS keys: %s", err)
-	}
 
 	// Create an array of gRPC options with the credentials
 	var opts []grpc.ServerOption
+	creds, err := credentials.NewClientTLSFromFile(certFile, "")
 	if *useSsl && *useAuthentication {
+		if err != nil {
+			return fmt.Errorf("could not load TLS keys: %s", err)
+		}
 		opts = []grpc.ServerOption{grpc.Creds(creds),
 			grpc.UnaryInterceptor(unaryInterceptor)}
 	} else if *useAuthentication {
 		opts = []grpc.ServerOption{grpc.UnaryInterceptor(unaryInterceptor)}
 	} else if *useSsl {
+		if err != nil {
+			return fmt.Errorf("could not load TLS keys: %s", err)
+		}
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	} else {
 		opts = []grpc.ServerOption{}
@@ -146,19 +147,23 @@ func startRESTServer(address, grpcAddress, certFile string) error {
 	defer cancel()
 	var mux *runtime.ServeMux
 
+	var opts []grpc.DialOption
 	if *useAuthentication {
 		mux = runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(credMatcher))
 	} else {
 		mux = runtime.NewServeMux()
 	}
-	creds, err := credentials.NewClientTLSFromFile(certFile, "")
-	if err != nil {
-		return fmt.Errorf("could not load TLS certificate: %s", err)
+	if *useSsl {
+		creds, err := credentials.NewClientTLSFromFile(certFile, "")
+		opts = []grpc.DialOption{grpc.WithTransportCredentials(creds)}
+		if err != nil {
+			return fmt.Errorf("could not load TLS certificate: %s", err)
+		}
+	} else {
+		opts = []grpc.DialOption{grpc.WithInsecure()}
 	}
-
 	// Setup the client gRPC options
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
-	err = api.RegisterAbstractOLTHandlerFromEndpoint(ctx, mux, grpcAddress, opts)
+	err := api.RegisterAbstractOLTHandlerFromEndpoint(ctx, mux, grpcAddress, opts)
 	if err != nil {
 		return fmt.Errorf("could not register service Ping: %s", err)
 	}
@@ -226,7 +231,7 @@ Params:
 	go func() {
 		err := startGRPCServer(grpcAddress, certFile, keyFile)
 		if err != nil {
-			log.Fatalf("failed to start gRPC server: %s", err)
+			log.Printf("failed to start gRPC server: %s", err)
 		}
 	}()
 
@@ -234,11 +239,28 @@ Params:
 	go func() {
 		err := startRESTServer(restAddress, grpcAddress, certFile)
 		if err != nil {
-			log.Fatalf("failed to start gRPC server: %s", err)
+			log.Printf("failed to start REST server: %s", err)
 		}
 	}()
 
 	// infinite loop
+	files, err := ioutil.ReadDir("backup")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, file := range files {
+		fmt.Println(file.Name())
+		chassisHolder := models.ChassisHolder{}
+		fileName := fmt.Sprintf("backup/%s", file.Name())
+		json, _ := ioutil.ReadFile(fileName)
+		err := chassisHolder.Deserialize([]byte(json))
+		if err != nil {
+			fmt.Printf("Deserialize threw an error %v\n", err)
+		}
+		chassisMap := models.GetChassisMap()
+		(*chassisMap)[file.Name()] = &chassisHolder
+	}
+
 	log.Printf("Entering infinite loop")
 	select {}
 	//TODO publish periodic stats etc

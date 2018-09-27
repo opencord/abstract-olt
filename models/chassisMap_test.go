@@ -23,16 +23,8 @@ import (
 )
 
 func TestChassisMap_GetPhyChassisMap(t *testing.T) {
-	firstChassisMap := models.GetPhyChassisMap()
-	secondChassisMap := models.GetPhyChassisMap()
-
-	if firstChassisMap != secondChassisMap {
-		t.Fatalf("GetPhyChassisMap should always return pointer to same map")
-	}
-}
-func TestChassisMap_GetAbstractChassisMap(t *testing.T) {
-	firstChassisMap := models.GetAbstractChassisMap()
-	secondChassisMap := models.GetAbstractChassisMap()
+	firstChassisMap := models.GetChassisMap()
+	secondChassisMap := models.GetChassisMap()
 
 	if firstChassisMap != secondChassisMap {
 		t.Fatalf("GetPhyChassisMap should always return pointer to same map")

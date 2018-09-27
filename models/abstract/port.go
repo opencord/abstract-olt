@@ -29,8 +29,8 @@ type Port struct {
 	Number int
 	// DeviceID string
 	Onts     [64]Ont
-	PhysPort *physical.PONPort
-	Parent   *Slot `json:"-"`
+	PhysPort *physical.PONPort `json:"-"`
+	Parent   *Slot             `json:"-"`
 }
 
 /*
@@ -50,7 +50,6 @@ func (e *UnprovisonedPortError) Error() string {
 }
 func (port *Port) provisionOnt(ontNumber int, serialNumber string) error {
 
-	fmt.Printf("My Number:%d abstract.port.provisionOnt(ontNumber:%d,serialNumber:%s\n", port.Number, ontNumber, serialNumber)
 	slot := port.Parent
 	chassis := *slot.Parent
 	baseID := fmt.Sprintf("%d/%d/%d/%d:%d.1.1", chassis.Rack, chassis.Shelf, slot.Number, port.Number, ontNumber)

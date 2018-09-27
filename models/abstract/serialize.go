@@ -14,23 +14,32 @@
  limitations under the License.
 */
 
-package settings_test
+package abstract
 
 import (
-	"testing"
-
-	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
+	"encoding/json"
 )
 
-func TestSettings_SetDebug(t *testing.T) {
-	settings.SetDebug(false)
-	if settings.GetDebug() {
-		t.Fatalf("Failed to set debug level")
-	}
+func (chassis *Chassis) Serialize() ([]byte, error) {
+	return json.Marshal(chassis)
 }
-func TestSettings_SetDummy(t *testing.T) {
-	settings.SetDummy(false)
-	if settings.GetDummy() {
-		t.Fatalf("Failed to set dummy level")
+
+func (chassis *Chassis) Deserialize(jsonData []byte) error {
+	err := json.Unmarshal(jsonData, chassis)
+
+	for i := 0; i < len(chassis.Slots); i++ {
+		var slot *Slot
+		slot = &chassis.Slots[i]
+		slot.Parent = chassis
+		for j := 0; j < len(slot.Ports); j++ {
+			var port *Port
+			port = &slot.Ports[j]
+			port.Parent = slot
+			for k := 0; k < len(port.Onts); k++ {
+				port.Onts[k].Parent = port
+			}
+		}
 	}
+
+	return err
 }

@@ -30,32 +30,49 @@ import (
 )
 
 func main() {
+	/* COMMAND FLAGS */
+	output := flag.Bool("output", false, "dump output")
 	echo := flag.Bool("e", false, "echo")
 	message := flag.String("message", "ping", "message to be echoed back")
 	create := flag.Bool("c", false, "create?")
 	addOlt := flag.Bool("s", false, "addOlt?")
 	provOnt := flag.Bool("o", false, "provisionOnt?")
-	clli := flag.String("clli", "", "clli of abstract chassis")
+	deleteOnt := flag.Bool("d", false, "deleteOnt")
+	/* END COMMAND FLAGS */
+
+	/* CREATE CHASSIS FLAGS */
 	xosAddress := flag.String("xos_address", "", "xos address")
 	xosPort := flag.Uint("xos_port", 0, "xos port")
 	rack := flag.Uint("rack", 1, "rack number for chassis")
 	shelf := flag.Uint("shelf", 1, "shelf number for chassis")
+	/* END CREATE CHASSIS FLAGS */
+
+	/* ADD OLT FLAGS */
 	oltAddress := flag.String("olt_address", "", "ip address for olt chassis")
 	oltPort := flag.Uint("olt_port", 0, "listen port for olt chassis")
 	name := flag.String("name", "", "friendly name for olt chassis")
 	driver := flag.String("driver", "", "driver to use with olt chassis")
 	oltType := flag.String("type", "", "olt chassis type")
+	/* END ADD OLT FLAGS */
+
+	/* PROVISION / DELETE ONT FLAGS */
 	slot := flag.Uint("slot", 1, "slot number 1-16 to provision ont to")
 	port := flag.Uint("port", 1, "port number 1-16 to provision ont to")
 	ont := flag.Uint("ont", 1, "ont number 1-64")
 	serial := flag.String("serial", "", "serial number of ont")
+	/* END PROVISION / DELETE ONT FLAGS */
+
+	/*GENERIC FLAGS */
+	clli := flag.String("clli", "", "clli of abstract chassis")
 	useSsl := flag.Bool("ssl", false, "use ssl")
 	useAuth := flag.Bool("auth", false, "use auth")
 	crtFile := flag.String("cert", "cert/server.crt", "Public cert for server to establish tls session")
 	serverAddressPort := flag.String("server", "localhost:7777", "address and port of AbstractOLT server")
 	fqdn := flag.String("fqdn", "", "FQDN of the service to match what is in server.crt")
+	/*GENERIC FLAGS */
 
 	flag.Parse()
+
 	if *useSsl {
 		if *fqdn == "" {
 			fqdn = &(strings.Split(*serverAddressPort, ":")[0])
@@ -63,16 +80,24 @@ func main() {
 		}
 	}
 
-	if (*echo && *addOlt) || (*echo && *create) || (*echo && *provOnt) || (*create && *addOlt) || (*create && *provOnt) || (*addOlt && *provOnt) {
-		fmt.Println("You can only call one method at a time")
+	cmdFlags := []*bool{echo, addOlt, create, provOnt, deleteOnt, output}
+	cmdCount := 0
+	for _, flag := range cmdFlags {
+		if *flag {
+			cmdCount++
+		}
+	}
+	if cmdCount > 1 {
+		fmt.Println("CMD You can only call one method at a time")
 		usage()
 		return
 	}
-	if !(*create || *provOnt || *addOlt || *echo) {
-		fmt.Println("You didn't specify an operation to perform")
+	if cmdCount < 1 {
+		fmt.Println("CMD You didn't specify an operation to perform")
 		usage()
 		return
 	}
+
 	var conn *grpc.ClientConn
 	var err error
 
@@ -113,6 +138,10 @@ func main() {
 		provisionONT(c, clli, slot, port, ont, serial)
 	} else if *echo {
 		ping(c, *message)
+	} else if *output {
+		Output(c)
+	} else if *deleteOnt {
+		deleteONT(c, clli, slot, port, ont, serial)
 	}
 
 }
@@ -135,6 +164,17 @@ func (a *Authentication) GetRequestMetadata(context.Context, ...string) (map[str
 func (a *Authentication) RequireTransportSecurity() bool {
 	return true
 }
+func Output(c api.AbstractOLTClient) error {
+	response, err := c.Output(context.Background(), &api.OutputMessage{Something: "wtf"})
+	if err != nil {
+		fmt.Printf("Error when calling Echo: %s", err)
+		return err
+	}
+	log.Printf("Response from server: %v", response.GetSuccess())
+
+	return nil
+}
+
 func ping(c api.AbstractOLTClient, message string) error {
 	response, err := c.Echo(context.Background(), &api.EchoMessage{Ping: message})
 	if err != nil {
@@ -205,6 +245,22 @@ func provisionONT(c api.AbstractOLTClient, clli *string, slot *uint, port *uint,
 
 	return nil
 }
+func deleteONT(c api.AbstractOLTClient, clli *string, slot *uint, port *uint, ont *uint, serial *string) error {
+	fmt.Println("clli", *clli)
+	fmt.Println("slot", *slot)
+	fmt.Println("port", *port)
+	fmt.Println("ont", *ont)
+	fmt.Println("serial", *serial)
+	res, err := c.DeleteOnt(context.Background(), &api.DeleteOntMessage{CLLI: *clli, SlotNumber: int32(*slot), PortNumber: int32(*port), OntNumber: int32(*ont), SerialNumber: *serial})
+	if err != nil {
+		debug.PrintStack()
+		fmt.Printf("Error when calling ProvsionOnt %s", err)
+		return err
+	}
+	log.Printf("Response from server: %t", res.GetSuccess())
+	return nil
+}
+
 func usage() {
 	var output = `
 	Usage ./client -server=[serverAddress:port] -[methodFlag] params
@@ -240,7 +296,18 @@ func usage() {
 	 -port OLT_PORT_NUMBER [1-16]
 	 -ont ONT_NUMBER [1-64]
 	 -serial ONT_SERIAL_NUM
-	 e.g. ./client -server=localhost:7777 -o -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf `
+	 e.g. ./client -server=localhost:7777 -o -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf
+   -d delete ont - removes ont from service
+      params:
+	 -clli CLLI_NAME
+	 -slot SLOT_NUMBER [1-16]
+	 -port OLT_PORT_NUMBER [1-16]
+	 -ont ONT_NUMBER [1-64]
+	 -serial ONT_SERIAL_NUM
+	 e.g. ./client -server=localhost:7777 -d -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf
+    -output (TEMPORARY) causes AbstractOLT to serialize all chassis to JSON file in $WorkingDirectory/backups
+         e.g. ./client -server=localhost:7777 -output
+	 `
 
 	fmt.Println(output)
 }

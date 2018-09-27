@@ -27,7 +27,7 @@ type PONPort struct {
 	Number   int
 	DeviceID string
 	Onts     [64]Ont
-	Parent   *Edgecore `json:"-"`
+	Parent   *SimpleOLT `json:"-"`
 }
 
 /*
@@ -70,7 +70,6 @@ ActivateOnt - passes ont information to chassis to make call to NEM to activate 
 func (port *PONPort) ActivateOnt(number int, sVlan int, cVlan int, serialNumber string, nasPortID string, circuitID string) error {
 	slot := port.Parent
 	chassis := slot.Parent
-	fmt.Printf("Calling ActivateOnt and port state is %t\n", port.Onts[number-1].Active)
 
 	if port.Onts[number-1].Active {
 		e := AllReadyActiveError{ontNumber: number, slotNum: slot.Number, ponportNum: port.Number, clli: chassis.CLLI}
@@ -90,7 +89,6 @@ DeleteOnt - passes ont information to chassis to make call to NEM to de-activate
 func (port *PONPort) DeleteOnt(number int, sVlan int, cVlan int, serialNumber string) error {
 	slot := port.Parent
 	chassis := slot.Parent
-	fmt.Printf("Calling ActivateOnt and port state is %t\n", port.Onts[number-1].Active)
 	if port.Onts[number-1].Active != true {
 		e := AllReadyDeactivatedError{ontNumber: number, slotNum: slot.Number, ponportNum: port.Number, clli: chassis.CLLI}
 		return &e

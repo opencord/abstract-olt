@@ -26,12 +26,11 @@ type Edgecore struct {
 /*
 CreateEdgecore takes simple olt struct and generates Edgecore OLT
 */
-func CreateEdgecore(olt *SimpleOLT) *Edgecore {
+func (olt *SimpleOLT) CreateEdgecore() {
 	var newPorts [16]PONPort
-	edge := Edgecore{SimpleOLT: *olt}
 	for i := 0; i < 16; i++ {
-		newPorts[i].Parent = &edge
+		newPorts[i].Parent = olt
+		newPorts[i].Number = i + 1
 	}
-	edge.Ports = newPorts[:]
-	return &edge
+	olt.Ports = newPorts[:]
 }

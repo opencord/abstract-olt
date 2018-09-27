@@ -23,6 +23,7 @@ PKG	         := "gerrit.opencord.org/abstract-olt"
 SERVER_PKG_BUILD := "${PKG}/cmd/AbstractOLT"
 CLIENT_PKG_BUILD := "${PKG}/client"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
+DOCKERTAG ?= "latest"
 
 
 .PHONY: all api server client test
@@ -59,6 +60,9 @@ swagger:
   -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --swagger_out=logtostderr=true:api \
   api/abstract_olt_api.proto
+
+docker: ## build docker image
+	@docker build -t sebaproject/abstract-olt:${DOCKERTAG} .
 
 api: api/abstract_olt_api.pb.go api/abstract_olt_api.pb.gw.go swagger
 

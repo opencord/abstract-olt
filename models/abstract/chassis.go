@@ -18,7 +18,6 @@ package abstract
 
 import (
 	"errors"
-	"fmt"
 )
 
 const MAX_SLOTS int = 16
@@ -64,7 +63,6 @@ func (chassis *Chassis) NextPort() (*Port, error) {
 	return nextPort, nil
 }
 func (chassis *Chassis) ActivateONT(slotNumber int, portNumber int, ontNumber int, serialNumber string) error {
-	fmt.Printf("chassis.ActivateONT(slot:%d,portNumber:%d,ontNumber:%d,serialNumber:%s\n", slotNumber, portNumber, ontNumber, serialNumber)
 	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].provisionOnt(ontNumber, serialNumber)
 	return err
 }

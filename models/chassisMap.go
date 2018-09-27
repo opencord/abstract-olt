@@ -18,34 +18,18 @@ package models
 
 import (
 	"sync"
-
-	"gerrit.opencord.org/abstract-olt/models/abstract"
-	"gerrit.opencord.org/abstract-olt/models/physical"
 )
 
 var once sync.Once
-var absOnce sync.Once
-var chassisMap map[string]*physical.Chassis
-var aChassisMap map[string]*abstract.Chassis
+var chassisMap map[string]*ChassisHolder
 
 /*
-GetPhyChassisMap return the chassis map singleton
+GetChassisMap return the chassis map singleton
 */
-func GetPhyChassisMap() *map[string]*physical.Chassis {
+func GetChassisMap() *map[string]*ChassisHolder {
 	// the go singleton pattern
 	once.Do(func() {
-		chassisMap = make(map[string]*physical.Chassis)
+		chassisMap = make(map[string]*ChassisHolder)
 	})
 	return &chassisMap
-}
-
-/*
-GetAbstractChassisMap return the chassis map singleton
-*/
-func GetAbstractChassisMap() *map[string]*abstract.Chassis {
-	// the go singleton pattern
-	absOnce.Do(func() {
-		aChassisMap = make(map[string]*abstract.Chassis)
-	})
-	return &aChassisMap
 }

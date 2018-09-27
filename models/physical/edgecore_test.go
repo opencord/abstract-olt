@@ -34,8 +34,8 @@ func TestPhysical_Edgecore(t *testing.T) {
 	switchPort := 3
 
 	olt := &physical.SimpleOLT{CLLI: clli, Hostname: hostname, Address: address, Parent: parent, DataSwitchPort: switchPort}
-	edgeCoreOlt := physical.CreateEdgecore(olt)
-	if edgeCoreOlt.GetCLLI() != clli {
+	olt.CreateEdgecore()
+	if olt.GetCLLI() != clli {
 		t.Fatal("Failed to assign CLLI in CreateEdgecore")
 	}
 }

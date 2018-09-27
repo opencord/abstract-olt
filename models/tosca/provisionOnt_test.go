@@ -17,7 +17,6 @@
 package tosca_test
 
 import (
-	"fmt"
 	"net"
 	"testing"
 
@@ -40,7 +39,7 @@ topology_template:
       type: tosca.nodes.AttWorkflowDriverWhiteListEntry
       properties:
         serial_number: some_serial
-        pon_port_id: 536870914
+        pon_port_id: 536870913
         device_id: of:00000000c0a8010b
       requirements:
       - owner:
@@ -57,6 +56,4 @@ func TestOntProvision_NewOntProvision(t *testing.T) {
 	if ontYaml != expected {
 		t.Fatalf("Didn't generate the expected yaml\n Generated:\n%s \nExpected:\n%s\n", ontYaml, expected)
 	}
-	fmt.Println(ontYaml)
-	fmt.Println("******************")
 }

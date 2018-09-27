@@ -84,12 +84,11 @@ func NewOntProvision(serialNumber string, oltIP net.IP, ponPortNumber int) OntPr
 	if err != nil {
 	}
 	props := &o.TopologyTemplate.NodeTemplates.Ont.Properties
-	props.PonPortID = offset + ponPortNumber
+	props.PonPortID = offset + (ponPortNumber - 1)
 	props.SerialNumber = serialNumber
 	ipNum := []byte(oltIP[12:16]) //only handling ipv4
 	ofID := fmt.Sprintf("of:00000000%0x", ipNum)
 	props.DeviceID = ofID
-	fmt.Printf("%v\n", o)
 	return o
 
 }
