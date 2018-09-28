@@ -13,24 +13,14 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-
-package settings_test
+package models
 
 import (
-	"testing"
-
-	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
+	"gerrit.opencord.org/abstract-olt/models/abstract"
+	"gerrit.opencord.org/abstract-olt/models/physical"
 )
 
-func TestSettings_SetDebug(t *testing.T) {
-	settings.SetDebug(false)
-	if settings.GetDebug() {
-		t.Fatalf("Failed to set debug level")
-	}
-}
-func TestSettings_SetDummy(t *testing.T) {
-	settings.SetDummy(false)
-	if settings.GetDummy() {
-		t.Fatalf("Failed to set dummy level")
-	}
+type ChassisHolder struct {
+	PhysicalChassis physical.Chassis
+	AbstractChassis abstract.Chassis
 }

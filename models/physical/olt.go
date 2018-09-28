@@ -29,7 +29,9 @@ type OLT interface {
 	GetPorts() []PONPort
 	GetParent() *Chassis
 	GetDataSwitchPort() int
+	SetNumber(int)
 	activate() error
+	Output()
 }
 
 /*
@@ -47,35 +49,42 @@ type SimpleOLT struct {
 	DataSwitchPort int
 }
 
-func (s *SimpleOLT) GetCLLI() string {
+func (s SimpleOLT) GetCLLI() string {
 	return s.CLLI
 }
 
-func (s *SimpleOLT) GetHostname() string {
+func (s SimpleOLT) GetHostname() string {
 	return s.Hostname
 }
 
-func (s *SimpleOLT) GetAddress() net.TCPAddr {
+func (s SimpleOLT) GetAddress() net.TCPAddr {
 	return s.Address
 }
 
-func (s *SimpleOLT) GetNumber() int {
+func (s SimpleOLT) GetNumber() int {
 	return s.Number
 }
+func (s SimpleOLT) SetNumber(num int) {
+	s.Number = num
+}
 
-func (s *SimpleOLT) GetPorts() []PONPort {
+func (s SimpleOLT) GetPorts() []PONPort {
 	return s.Ports
 }
 
-func (s *SimpleOLT) GetParent() *Chassis {
+func (s SimpleOLT) GetParent() *Chassis {
 	return s.Parent
 }
 
-func (s *SimpleOLT) GetDataSwitchPort() int {
+func (s SimpleOLT) GetDataSwitchPort() int {
 	return s.DataSwitchPort
 }
-func (s *SimpleOLT) activate() error {
+func (s SimpleOLT) activate() error {
 	s.Active = true
+	//TODO make call to XOS to activate phyiscal OLT
+	return nil
+}
+func (s SimpleOLT) Output() error {
 	//TODO make call to XOS to activate phyiscal OLT
 	return nil
 }

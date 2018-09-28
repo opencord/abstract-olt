@@ -60,6 +60,9 @@ swagger:
   --swagger_out=logtostderr=true:api \
   api/abstract_olt_api.proto
 
+docker: ## build docker image
+	@docker build -t sebaproject/abstract-olt:${DOCKERTAG} .
+
 api: api/abstract_olt_api.pb.go api/abstract_olt_api.pb.gw.go swagger
 
 dep: ## Get the dependencies

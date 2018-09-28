@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"strings"
 
 	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
@@ -36,6 +37,9 @@ Server instance of the grpc server
 type Server struct {
 }
 
+/*
+Echo - Tester function which just returns same string sent to it
+*/
 func (s *Server) Echo(ctx context.Context, in *EchoMessage) (*EchoReplyMessage, error) {
 	ping := in.GetPing()
 	pong := EchoReplyMessage{Pong: ping}
@@ -46,23 +50,24 @@ func (s *Server) Echo(ctx context.Context, in *EchoMessage) (*EchoReplyMessage, 
 CreateChassis - allocates a new Chassis struct and stores it in chassisMap
 */
 func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*AddChassisReturn, error) {
-	phyChassisMap := models.GetPhyChassisMap()
-	absChassisMap := models.GetAbstractChassisMap()
+	chassisMap := models.GetChassisMap()
 	clli := in.GetCLLI()
-	chassis := (*phyChassisMap)[clli]
-	if chassis != nil {
-		return &AddChassisReturn{DeviceID: chassis.CLLI}, nil
+	chassisHolder := (*chassisMap)[clli]
+	if chassisHolder != nil {
+		return &AddChassisReturn{DeviceID: chassisHolder.AbstractChassis.CLLI}, nil
 	}
+
 	abstractChassis := abstract.GenerateChassis(clli, int(in.GetRack()), int(in.GetShelf()))
-	phyChassis := &physical.Chassis{CLLI: clli, VCoreAddress: net.TCPAddr{IP: net.ParseIP(in.GetVCoreIP()), Port: int(in.GetVCorePort())}, Rack: int(in.GetRack()), Shelf: int(in.GetShelf())}
+	phyChassis := physical.Chassis{CLLI: clli, VCoreAddress: net.TCPAddr{IP: net.ParseIP(in.GetVCoreIP()),
+		Port: int(in.GetVCorePort())}, Rack: int(in.GetRack()), Shelf: int(in.GetShelf())}
+
+	chassisHolder = &models.ChassisHolder{AbstractChassis: abstractChassis, PhysicalChassis: phyChassis}
 	if settings.GetDebug() {
 		output := fmt.Sprintf("%v", abstractChassis)
 		formatted := strings.Replace(output, "{", "\n{", -1)
 		log.Printf("new chassis %s\n", formatted)
 	}
-	(*phyChassisMap)[clli] = phyChassis
-	fmt.Printf("phy %v, abs %v\n", phyChassisMap, absChassisMap)
-	(*absChassisMap)[clli] = abstractChassis
+	(*chassisMap)[clli] = chassisHolder
 	return &AddChassisReturn{DeviceID: clli}, nil
 }
 
@@ -71,64 +76,47 @@ CreateOLTChassis adds an OLT chassis/line card to the Physical chassis
 */
 func (s *Server) CreateOLTChassis(ctx context.Context, in *AddOLTChassisMessage) (*AddOLTChassisReturn, error) {
 	fmt.Printf(" CreateOLTChassis %v \n", *in)
-	phyChassisMap := models.GetPhyChassisMap()
+	chassisMap := models.GetChassisMap()
 	clli := in.GetCLLI()
-	chassis := (*phyChassisMap)[clli]
-	if chassis == nil {
+	chassisHolder := (*chassisMap)[clli]
+	if chassisHolder == nil {
 		errString := fmt.Sprintf("There is no chassis with CLLI of %s", clli)
 		return &AddOLTChassisReturn{DeviceID: "", ChassisDeviceID: ""}, errors.New(errString)
 	}
 	oltType := in.GetType()
 	address := net.TCPAddr{IP: net.ParseIP(in.GetSlotIP()), Port: int(in.GetSlotPort())}
-	sOlt := physical.SimpleOLT{CLLI: clli, Hostname: in.GetHostname(), Address: address, Parent: chassis}
-
-	var olt physical.OLT
+	physicalChassis := &chassisHolder.PhysicalChassis
+	sOlt := physical.SimpleOLT{CLLI: clli, Hostname: in.GetHostname(), Address: address, Parent: physicalChassis}
 	switch oltType {
 	case AddOLTChassisMessage_edgecore:
-		olt = physical.CreateEdgecore(&sOlt)
+		sOlt.CreateEdgecore()
 	case AddOLTChassisMessage_adtran:
 	case AddOLTChassisMessage_tibit:
 	}
-	err := AddCard(chassis, olt)
-	if err != nil {
-		//TODO do something
+	physicalChassis.AddOLTChassis(sOlt)
+	ports := sOlt.GetPorts()
+	for i := 0; i < len(ports); i++ {
+		absPort, _ := chassisHolder.AbstractChassis.NextPort()
+
+		absPort.PhysPort = &ports[i]
+		//AssignTraits(&ports[i], absPort)
 	}
 	return &AddOLTChassisReturn{DeviceID: in.GetHostname(), ChassisDeviceID: clli}, nil
 
 }
 
 /*
-AddCard Adds an OLT card to an existing physical chassis, allocating ports
-in the physical card to those in the abstract model
-*/
-func AddCard(physChassis *physical.Chassis, olt physical.OLT) error {
-	physChassis.AddOLTChassis(olt)
-
-	ports := olt.GetPorts()
-	absChassis := (*models.GetAbstractChassisMap())[physChassis.CLLI]
-
-	for i := 0; i < len(ports); i++ {
-		absPort, _ := absChassis.NextPort()
-
-		absPort.PhysPort = &ports[i]
-		//AssignTraits(&ports[i], absPort)
-	}
-	//should probably worry about error at some point
-	return nil
-}
-
-/*
 ProvisionOnt provisions an ONT on a specific Chassis/LineCard/Port
 */
 func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntReturn, error) {
-	absChassisMap := models.GetAbstractChassisMap()
+	chassisMap := models.GetChassisMap()
 	clli := in.GetCLLI()
-	chassis := (*absChassisMap)[clli]
-	if chassis == nil {
+	chassisHolder := (*chassisMap)[clli]
+	if chassisHolder == nil {
 		errString := fmt.Sprintf("There is no chassis with CLLI of %s", clli)
 		return &AddOntReturn{Success: false}, errors.New(errString)
 	}
-	err := chassis.ActivateONT(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetOntNumber()), in.GetSerialNumber())
+	err := chassisHolder.AbstractChassis.ActivateONT(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetOntNumber()), in.GetSerialNumber())
 
 	if err != nil {
 		return nil, err
@@ -140,12 +128,27 @@ func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntRe
 DeleteOnt - deletes a previously provision ont
 */
 func (s *Server) DeleteOnt(ctx context.Context, in *DeleteOntMessage) (*DeleteOntReturn, error) {
-	absChassisMap := models.GetAbstractChassisMap()
+	chassisMap := models.GetChassisMap()
 	clli := in.GetCLLI()
-	chassis := (*absChassisMap)[clli]
-	err := chassis.DeleteONT(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetOntNumber()), in.GetSerialNumber())
+	chassisHolder := (*chassisMap)[clli]
+	err := chassisHolder.AbstractChassis.DeleteONT(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetOntNumber()), in.GetSerialNumber())
 	if err != nil {
 		return nil, err
 	}
 	return &DeleteOntReturn{Success: true}, nil
+}
+
+func (s *Server) Output(ctx context.Context, in *OutputMessage) (*OutputReturn, error) {
+	chassisMap := models.GetChassisMap()
+	for clli, chassisHolder := range *chassisMap {
+
+		json, _ := (chassisHolder).Serialize()
+		backupFile := fmt.Sprintf("backup/%s", clli)
+		f, _ := os.Create(backupFile)
+		defer f.Close()
+		_, _ = f.WriteString(string(json))
+		f.Sync()
+	}
+	return &OutputReturn{Success: true}, nil
+
 }

@@ -33,14 +33,20 @@ Chassis is a model that takes up to 16 discreet OLT chassis as if it is a 16 slo
 type Chassis struct {
 	CLLI         string
 	VCoreAddress net.TCPAddr
-	Dataswitch   DataSwitch
-	Linecards    []OLT
-	Rack         int
-	Shelf        int
+	//	Dataswitch   DataSwitch
+	Linecards []SimpleOLT
+	Rack      int
+	Shelf     int
 }
 type UnprovisionedSlotError struct {
 	CLLI       string
 	SlotNumber int
+}
+
+func (c *Chassis) Output() {
+	for _, olt := range c.Linecards {
+		olt.Output()
+	}
 }
 
 func (e *UnprovisionedSlotError) Error() string {
@@ -50,10 +56,10 @@ func (e *UnprovisionedSlotError) Error() string {
 /*
 AddOLTChassis - adds a reference to a new olt chassis
 */
-func (chassis *Chassis) AddOLTChassis(olt OLT) {
+func (chassis *Chassis) AddOLTChassis(olt SimpleOLT) {
+	olt.SetNumber((len(chassis.Linecards) + 1))
 	chassis.Linecards = append(chassis.Linecards, olt)
 	//TODO - api call to add olt i.e. preprovision_olt
-	fmt.Printf("chassis.AddOLTChassis(%s)\n", olt.GetHostname())
 	//S>103 func NewOltProvision(name string, deviceType string, host string, port int) OltProvsion {
 	ipString := olt.GetAddress().IP.String()
 	webServerPort := olt.GetAddress().Port
@@ -71,15 +77,15 @@ func (chassis *Chassis) AddOLTChassis(olt OLT) {
 	req.Header.Add("xos-password", "letmein")
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("ERROR :) %v\n", err)
+		//TODO
 		// handle error
 	}
-	fmt.Printf("Response is %v\n", resp)
+	log.Printf("Server response was %v\n", resp)
 
 }
 func (chassis *Chassis) provisionONT(ont Ont) {
 	//TODO - api call to provison s/c vlans and ont serial number etc
-	fmt.Printf("chassis.provisionONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
+	log.Printf("chassis.provisionONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
 	ponPort := ont.Parent
 	slot := ponPort.Parent
 
@@ -99,31 +105,24 @@ func (chassis *Chassis) provisionONT(ont Ont) {
 	req.Header.Add("xos-password", "letmein")
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("ERROR :) %v\n", err)
+		log.Printf("ERROR :) %v\n", err)
 		// handle error
 	}
-	fmt.Printf("Response is %v\n", resp)
+	log.Printf("Response is %v\n", resp)
 	rgName := fmt.Sprintf("%s_%d_%d_%d_RG", chassis.CLLI, slot.Number, ponPort.Number, ont.Number)
 	subStruct := tosca.NewSubscriberProvision(rgName, ont.Cvlan, ont.Svlan, ont.SerialNumber, ont.NasPortID, ont.CircuitID, chassis.CLLI)
 	yaml, _ = subStruct.ToYaml()
-	fmt.Printf("yaml:%s\n", yaml)
+	log.Printf("yaml:%s\n", yaml)
 	req, err = http.NewRequest("POST", requestList, strings.NewReader(yaml))
 	req.Header.Add("xos-username", "admin@opencord.org")
 	req.Header.Add("xos-password", "letmein")
 	resp, err = client.Do(req)
 	if err != nil {
-		fmt.Printf("ERROR :) %v\n", err)
+		log.Printf("ERROR :) %v\n", err)
 		// handle error
 	}
 }
 func (chassis *Chassis) deleteONT(ont Ont) {
 	//TODO - api call to provison s/c vlans and ont serial number etc
-	fmt.Printf("chassis.deleteONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
-}
-func (chassis *Chassis) ActivateSlot(slotNumber int) error {
-	// AT&T backend systems start at 1 and not 0 :P
-	if chassis.Linecards[slotNumber-1] == nil {
-		return &UnprovisionedSlotError{CLLI: chassis.CLLI, SlotNumber: slotNumber}
-	}
-	return chassis.Linecards[slotNumber-1].activate()
+	log.Printf("chassis.deleteONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
 }

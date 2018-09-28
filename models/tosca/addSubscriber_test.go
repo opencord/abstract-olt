@@ -17,7 +17,6 @@
 package tosca_test
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -46,9 +45,7 @@ topology_template:
 var sub tosca.SubscriberProvision
 
 func TestAddSubscriber_NewSubscriberProvision(t *testing.T) {
-	fmt.Println("Int TestAddSubscriber_NewSubscriberProvision")
 	sub = tosca.NewSubscriberProvision("myName", 20, 2, "onuSerialNumber", "/1/1/1/1/1.9", "/1/1/1/1/1.9-CID", "myCilli")
-	fmt.Printf("%v\n\n", sub)
 }
 
 func TestAddSubscriber_ToYaml(t *testing.T) {
@@ -59,17 +56,7 @@ func TestAddSubscriber_ToYaml(t *testing.T) {
 
 	x := strings.Compare(y, expectedOutput)
 	if x != 0 {
-		fmt.Println("******")
-		fmt.Println(expectedOutput)
-		fmt.Println("******")
-		fmt.Println(y)
-		fmt.Println("******")
 		t.Fatal("ToYaml didn't produce the expected yaml")
 	}
-	fmt.Printf("Compare is %d\n", x)
 
-	fmt.Printf(y)
-	fmt.Println("******")
-	fmt.Print(output)
-	fmt.Println("******")
 }

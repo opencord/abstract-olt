@@ -46,11 +46,17 @@ topology_template:
            outer_tpid: "0x8100"
            uplink: "65536"
            nas_id:
+           switch_datapath_id: of:0000000000000001
+           switch_port: "1"
         requirements:
           - volt_service:
               node: service#volt
               relationship: tosca.relationships.BelongsToOne
 `
+
+/*
+OltProvision struct that serves as model for yaml to provsion OLT in XOS
+*/
 
 type OltProvsion struct {
 	ToscaDefinitionsVersion string   `yaml:"tosca_definitions_version"`
@@ -68,13 +74,15 @@ type OltProvsion struct {
 			OltDevice struct {
 				DeviceType string `yaml:"type"`
 				Properties struct {
-					Name      string `yaml:"name"`
-					Type      string `yaml:"device_type"`
-					Host      string `yaml:"host"`
-					Port      int    `yaml:"port"`
-					OuterTpid string `yaml:"outer_tpid"`
-					Uplink    string `yaml:"uplink"`
-					NasID     string `yaml:"nas_id"`
+					Name             string `yaml:"name"`
+					Type             string `yaml:"device_type"`
+					Host             string `yaml:"host"`
+					Port             int    `yaml:"port"`
+					OuterTpid        string `yaml:"outer_tpid"`
+					Uplink           string `yaml:"uplink"`
+					NasID            string `yaml:"nas_id"`
+					SwitchDataPathID string `yaml:"switch_datapath_id"`
+					SwitchPort       string `yaml:"switch_port"`
 				} `yaml:"properties"`
 				Requirements []struct {
 					VoltService struct {

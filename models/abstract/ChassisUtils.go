@@ -19,7 +19,7 @@ package abstract
 /*
 GenerateChassis - constructs a new AbstractOLT Chassis
 */
-func GenerateChassis(CLLI string, rack int, shelf int) *Chassis {
+func GenerateChassis(CLLI string, rack int, shelf int) Chassis {
 	chassis := Chassis{CLLI: CLLI, Rack: rack, Shelf: shelf}
 
 	var slots [16]Slot
@@ -28,7 +28,7 @@ func GenerateChassis(CLLI string, rack int, shelf int) *Chassis {
 	}
 
 	chassis.Slots = slots
-	return &chassis
+	return chassis
 }
 
 func generateSlot(n int, c *Chassis) Slot {

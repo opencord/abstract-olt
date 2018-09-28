@@ -81,6 +81,12 @@ message DeleteOntMessage{
 message DeleteOntReturn{
    bool Success=1;
 }
+message OutputMessage{
+   string Something=1;
+}
+message OutputReturn{
+   bool Success=1;
+}
 service AbstractOLT{
    rpc Echo(EchoMessage) returns (EchoReplyMessage){
       option(google.api.http)={
@@ -109,6 +115,12 @@ service AbstractOLT{
    rpc DeleteOnt(DeleteOntMessage) returns (DeleteOntReturn){
       option(google.api.http)={
         post:"/v1/DeleteOnt"
+	body:"*"
+      };
+   }
+   rpc Output(OutputMessage)returns(OutputReturn){
+      option(google.api.http)={
+        post:"/v1/Output"
 	body:"*"
       };
    }
