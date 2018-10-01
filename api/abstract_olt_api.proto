@@ -25,14 +25,25 @@ message EchoReplyMessage{
 
 message AddChassisMessage{
    string CLLI =1;
-   string VCoreIP =2;
-   int32 VCorePort=3;
-   int32 Rack=4;
-   int32 Shelf=5;
+   string XOSIP =2;
+   int32 XOSPort=3;
+   string XOSUser=4;
+   string XOSPassword=5;
+   int32 Rack=6;
+   int32 Shelf=7;
 }
 message AddChassisReturn{
    string DeviceID = 1;
 }
+message ChangeXOSUserPasswordMessage{
+   string CLLI =1;
+   string XOSUser=2;
+   string XOSPassword=3;
+}
+message ChangeXOSUserPasswordReturn{
+   bool Success=1;
+}
+
 message AddOLTChassisMessage{
    string CLLI=1;
    string SlotIP=2;
@@ -98,6 +109,12 @@ service AbstractOLT{
       option(google.api.http) = {
          post: "/v1/CreateAbstractChassis"
 	 body:"*"
+      };
+   }
+   rpc ChangeXOSUserPassword(ChangeXOSUserPasswordMessage) returns(ChangeXOSUserPasswordReturn){
+      option(google.api.http)={
+        post:"/v1/ChangeXOSUserPassword"
+	body:"*"
       };
    }
    rpc CreateOLTChassis(AddOLTChassisMessage) returns (AddOLTChassisReturn) {

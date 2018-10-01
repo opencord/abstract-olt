@@ -31,12 +31,13 @@ import (
 Chassis is a model that takes up to 16 discreet OLT chassis as if it is a 16 slot OLT chassis
 */
 type Chassis struct {
-	CLLI         string
-	VCoreAddress net.TCPAddr
-	//	Dataswitch   DataSwitch
-	Linecards []SimpleOLT
-	Rack      int
-	Shelf     int
+	CLLI        string
+	XOSAddress  net.TCPAddr
+	XOSUser     string
+	XOSPassword string
+	Linecards   []SimpleOLT
+	Rack        int
+	Shelf       int
 }
 type UnprovisionedSlotError struct {
 	CLLI       string
@@ -71,10 +72,10 @@ func (chassis *Chassis) AddOLTChassis(olt SimpleOLT) {
 		return
 	}
 	client := &http.Client{}
-	requestList := fmt.Sprintf("http://%s:%d/run", chassis.VCoreAddress.IP.String(), chassis.VCoreAddress.Port)
+	requestList := fmt.Sprintf("http://%s:%d/run", chassis.XOSAddress.IP.String(), chassis.XOSAddress.Port)
 	req, err := http.NewRequest("POST", requestList, strings.NewReader(yaml))
-	req.Header.Add("xos-username", "admin@opencord.org")
-	req.Header.Add("xos-password", "letmein")
+	req.Header.Add("xos-username", chassis.XOSUser)
+	req.Header.Add("xos-password", chassis.XOSPassword)
 	resp, err := client.Do(req)
 	if err != nil {
 		//TODO
@@ -99,10 +100,10 @@ func (chassis *Chassis) provisionONT(ont Ont) {
 		return
 	}
 	client := &http.Client{}
-	requestList := fmt.Sprintf("http://%s:%d/run", chassis.VCoreAddress.IP.String(), chassis.VCoreAddress.Port)
+	requestList := fmt.Sprintf("http://%s:%d/run", chassis.XOSAddress.IP.String(), chassis.XOSAddress.Port)
 	req, err := http.NewRequest("POST", requestList, strings.NewReader(yaml))
-	req.Header.Add("xos-username", "admin@opencord.org")
-	req.Header.Add("xos-password", "letmein")
+	req.Header.Add("xos-username", chassis.XOSUser)
+	req.Header.Add("xos-password", chassis.XOSPassword)
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("ERROR :) %v\n", err)
@@ -114,8 +115,8 @@ func (chassis *Chassis) provisionONT(ont Ont) {
 	yaml, _ = subStruct.ToYaml()
 	log.Printf("yaml:%s\n", yaml)
 	req, err = http.NewRequest("POST", requestList, strings.NewReader(yaml))
-	req.Header.Add("xos-username", "admin@opencord.org")
-	req.Header.Add("xos-password", "letmein")
+	req.Header.Add("xos-username", chassis.XOSUser)
+	req.Header.Add("xos-password", chassis.XOSPassword)
 	resp, err = client.Do(req)
 	if err != nil {
 		log.Printf("ERROR :) %v\n", err)

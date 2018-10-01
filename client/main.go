@@ -35,12 +35,15 @@ func main() {
 	echo := flag.Bool("e", false, "echo")
 	message := flag.String("message", "ping", "message to be echoed back")
 	create := flag.Bool("c", false, "create?")
+	update := flag.Bool("u", false, "update?")
 	addOlt := flag.Bool("s", false, "addOlt?")
 	provOnt := flag.Bool("o", false, "provisionOnt?")
 	deleteOnt := flag.Bool("d", false, "deleteOnt")
 	/* END COMMAND FLAGS */
 
 	/* CREATE CHASSIS FLAGS */
+	xosUser := flag.String("xos_user", "", "xos_user")
+	xosPassword := flag.String("xos_password", "", "xos_password")
 	xosAddress := flag.String("xos_address", "", "xos address")
 	xosPort := flag.Uint("xos_port", 0, "xos port")
 	rack := flag.Uint("rack", 1, "rack number for chassis")
@@ -80,7 +83,7 @@ func main() {
 		}
 	}
 
-	cmdFlags := []*bool{echo, addOlt, create, provOnt, deleteOnt, output}
+	cmdFlags := []*bool{echo, addOlt, update, create, provOnt, deleteOnt, output}
 	cmdCount := 0
 	for _, flag := range cmdFlags {
 		if *flag {
@@ -131,7 +134,9 @@ func main() {
 
 	c := api.NewAbstractOLTClient(conn)
 	if *create {
-		createChassis(c, clli, xosAddress, xosPort, rack, shelf)
+		createChassis(c, clli, xosUser, xosPassword, xosAddress, xosPort, rack, shelf)
+	} else if *update {
+		updateXOSUserPassword(c, clli, xosUser, xosPassword)
 	} else if *addOlt {
 		addOltChassis(c, clli, oltAddress, oltPort, name, driver, oltType)
 	} else if *provOnt {
@@ -185,14 +190,17 @@ func ping(c api.AbstractOLTClient, message string) error {
 	return nil
 }
 
-func createChassis(c api.AbstractOLTClient, clli *string, xosAddress *string, xosPort *uint, rack *uint, shelf *uint) error {
+func createChassis(c api.AbstractOLTClient, clli *string, xosUser *string, xosPassword *string, xosAddress *string, xosPort *uint, rack *uint, shelf *uint) error {
 	fmt.Println("Calling Create Chassis")
 	fmt.Println("clli", *clli)
+	fmt.Println("xos_user", *xosUser)
+	fmt.Println("xos_password", *xosPassword)
 	fmt.Println("xos_address", *xosAddress)
 	fmt.Println("xos_port", *xosPort)
 	fmt.Println("rack", *rack)
 	fmt.Println("shelf", *shelf)
-	response, err := c.CreateChassis(context.Background(), &api.AddChassisMessage{CLLI: *clli, VCoreIP: *xosAddress, VCorePort: int32(*xosPort), Rack: int32(*rack), Shelf: int32(*shelf)})
+	response, err := c.CreateChassis(context.Background(), &api.AddChassisMessage{CLLI: *clli, XOSUser: *xosUser, XOSPassword: *xosPassword,
+		XOSIP: *xosAddress, XOSPort: int32(*xosPort), Rack: int32(*rack), Shelf: int32(*shelf)})
 	if err != nil {
 		fmt.Printf("Error when calling CreateChassis: %s", err)
 		return err
@@ -200,6 +208,20 @@ func createChassis(c api.AbstractOLTClient, clli *string, xosAddress *string, xo
 	log.Printf("Response from server: %s", response.GetDeviceID())
 	return nil
 }
+func updateXOSUserPassword(c api.AbstractOLTClient, clli *string, xosUser *string, xosPassword *string) error {
+	fmt.Println("Calling Update XOS USER/PASSWORD")
+	fmt.Println("clli", *clli)
+	fmt.Println("xos_user", *xosUser)
+	fmt.Println("xos_password", *xosPassword)
+	response, err := c.ChangeXOSUserPassword(context.Background(), &api.ChangeXOSUserPasswordMessage{CLLI: *clli, XOSUser: *xosUser, XOSPassword: *xosPassword})
+	if err != nil {
+		fmt.Printf("Error when calling UpdateXOSUserPassword: %s", err)
+		return err
+	}
+	log.Printf("Response from server: %s", response.GetSuccess())
+	return nil
+}
+
 func addOltChassis(c api.AbstractOLTClient, clli *string, oltAddress *string, oltPort *uint, name *string, driver *string, oltType *string) error {
 	fmt.Println("clli", *clli)
 	fmt.Println("olt_address", *oltAddress)
@@ -275,11 +297,18 @@ func usage() {
    -c create chassis
       params:
          -clli CLLI_NAME
+	 -xos_user XOS_USER
+	 -xos_password XOS_PASSWORD
 	 -xos_address XOS_TOSCA_IP
 	 -xos_port XOS_TOSCA_LISTEN_PORT
 	 -rack [optional default 1]
 	 -shelf [optional default 1]
-	 e.g. ./client -server=localhost:7777 -c -clli MY_CLLI -xos_address 192.168.0.1 -xos_port 30007 -rack 1 -shelf 1
+	 e.g. ./client -server=localhost:7777 -c -clli MY_CLLI -xos_user foundry -xos_password password -xos_address 192.168.0.1 -xos_port 30007 -rack 1 -shelf 1
+   -u update xos user/password
+         -clli CLLI_NAME
+	 -xos_user XOS_USER
+	 -xos_password XOS_PASSWORD
+	 e.g. ./client -server=localhost:7777 -u -clli MY_CLLI -xos_user NEW_USER -xos_password NEW_PASSWORD
    -s add physical olt chassis to chassis
       params:
          -clli CLLI_NAME - identifies abstract chassis to assign olt chassis to

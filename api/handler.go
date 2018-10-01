@@ -19,8 +19,10 @@ package api
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"strings"
 
@@ -52,14 +54,35 @@ CreateChassis - allocates a new Chassis struct and stores it in chassisMap
 func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*AddChassisReturn, error) {
 	chassisMap := models.GetChassisMap()
 	clli := in.GetCLLI()
+
+	xosIP := net.ParseIP(in.GetXOSIP())
+	xosPort := int(in.GetXOSPort())
+	if xosIP == nil {
+		errStr := fmt.Sprintf("Invalid IP %s supplied for XOSIP", in.GetXOSIP())
+		return nil, errors.New(errStr)
+	}
+
+	xosAddress := net.TCPAddr{IP: xosIP, Port: xosPort}
+
+	xosUser := in.GetXOSUser()
+	xosPassword := in.GetXOSPassword()
+	if xosUser == "" || xosPassword == "" {
+		return nil, errors.New("Either XOSUser or XOSPassword supplied were empty")
+	}
+	loginWorked := testLogin(xosUser, xosPassword, xosIP, xosPort)
+	if !loginWorked {
+		return nil, errors.New("Unable to validate login not creating Abstract Chassis")
+	}
+	shelf := int(in.GetShelf())
+	rack := int(in.GetRack())
+
 	chassisHolder := (*chassisMap)[clli]
 	if chassisHolder != nil {
 		return &AddChassisReturn{DeviceID: chassisHolder.AbstractChassis.CLLI}, nil
 	}
 
 	abstractChassis := abstract.GenerateChassis(clli, int(in.GetRack()), int(in.GetShelf()))
-	phyChassis := physical.Chassis{CLLI: clli, VCoreAddress: net.TCPAddr{IP: net.ParseIP(in.GetVCoreIP()),
-		Port: int(in.GetVCorePort())}, Rack: int(in.GetRack()), Shelf: int(in.GetShelf())}
+	phyChassis := physical.Chassis{CLLI: clli, XOSAddress: xosAddress, Rack: rack, Shelf: shelf}
 
 	chassisHolder = &models.ChassisHolder{AbstractChassis: abstractChassis, PhysicalChassis: phyChassis}
 	if settings.GetDebug() {
@@ -69,6 +92,35 @@ func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*Add
 	}
 	(*chassisMap)[clli] = chassisHolder
 	return &AddChassisReturn{DeviceID: clli}, nil
+}
+
+/*
+ChangeXOSUserPassword - allows update of xos credentials
+*/
+func (s *Server) ChangeXOSUserPassword(ctx context.Context, in *ChangeXOSUserPasswordMessage) (*ChangeXOSUserPasswordReturn, error) {
+	clli := in.GetCLLI()
+	xosUser := in.GetXOSUser()
+	xosPassword := in.GetXOSPassword()
+	if xosUser == "" || xosPassword == "" {
+		return nil, errors.New("Either XOSUser or XOSPassword supplied were empty")
+	}
+	chassisMap := models.GetChassisMap()
+	chassisHolder := (*chassisMap)[clli]
+	if chassisHolder == nil {
+		errString := fmt.Sprintf("There is no chassis with CLLI of %s", clli)
+		return nil, errors.New(errString)
+	}
+	xosIP := chassisHolder.PhysicalChassis.XOSAddress.IP
+	xosPort := chassisHolder.PhysicalChassis.XOSAddress.Port
+	loginWorked := testLogin(xosUser, xosPassword, xosIP, xosPort)
+	if !loginWorked {
+		return nil, errors.New("Unable to validate login when changing password")
+	}
+
+	chassisHolder.PhysicalChassis.XOSUser = xosUser
+	chassisHolder.PhysicalChassis.XOSPassword = xosPassword
+	return &ChangeXOSUserPasswordReturn{Success: true}, nil
+
 }
 
 /*
@@ -150,5 +202,41 @@ func (s *Server) Output(ctx context.Context, in *OutputMessage) (*OutputReturn, 
 		f.Sync()
 	}
 	return &OutputReturn{Success: true}, nil
+
+}
+func testLogin(xosUser string, xosPassword string, xosIP net.IP, xosPort int) bool {
+	var dummyYaml = `
+tosca_definitions_version: tosca_simple_yaml_1_0
+imports:
+  - custom_types/site.yaml
+description: anything
+topology_template:
+  node_templates:
+    mysite:
+      type: tosca.nodes.Site
+      properties:
+        must-exist: true
+        name: mysite
+`
+	client := &http.Client{}
+	requestList := fmt.Sprintf("http://%s:%d/run", xosIP, xosPort)
+	req, err := http.NewRequest("POST", requestList, strings.NewReader(dummyYaml))
+	req.Header.Add("xos-username", xosUser)
+	req.Header.Add("xos-password", xosPassword)
+	resp, err := client.Do(req)
+	log.Printf("testLogin resp:%v", resp)
+	if err != nil {
+		log.Printf("Unable to validate XOS Login Information %v", err)
+		return false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		bodyString := string(bodyBytes)
+		fmt.Println(bodyString)
+		return true
+	}
+	return false
 
 }
