@@ -36,7 +36,7 @@ func TestChassisSerialize_Serialize(t *testing.T) {
 	clli = "TEST_CLLI"
 	chassisMap = models.GetChassisMap()
 	abstractChassis := abstract.GenerateChassis(clli, 1, 1)
-	phyChassis := physical.Chassis{CLLI: clli, VCoreAddress: net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 1234}, Rack: 1, Shelf: 1}
+	phyChassis := physical.Chassis{CLLI: clli, XOSAddress: net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 1234}, Rack: 1, Shelf: 1}
 	chassisHolder := &models.ChassisHolder{AbstractChassis: abstractChassis, PhysicalChassis: phyChassis}
 	(*chassisMap)[clli] = chassisHolder
 	sOlt := physical.SimpleOLT{CLLI: clli, Hostname: "slot1", Address: net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 1234}, Parent: &phyChassis}

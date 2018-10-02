@@ -218,7 +218,7 @@ func updateXOSUserPassword(c api.AbstractOLTClient, clli *string, xosUser *strin
 		fmt.Printf("Error when calling UpdateXOSUserPassword: %s", err)
 		return err
 	}
-	log.Printf("Response from server: %s", response.GetSuccess())
+	log.Printf("Response from server: %t", response.GetSuccess())
 	return nil
 }
 

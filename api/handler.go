@@ -205,6 +205,9 @@ func (s *Server) Output(ctx context.Context, in *OutputMessage) (*OutputReturn, 
 
 }
 func testLogin(xosUser string, xosPassword string, xosIP net.IP, xosPort int) bool {
+	if settings.GetDummy() {
+		return true
+	}
 	var dummyYaml = `
 tosca_definitions_version: tosca_simple_yaml_1_0
 imports:
