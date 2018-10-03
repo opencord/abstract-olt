@@ -47,6 +47,7 @@ RUN apk add --update libc6-compat
 WORKDIR /app
 COPY --from=builder /go/src/gerrit.opencord.org/abstract-olt/bin/AbstractOLT /app/AbstractOLT
 COPY --from=builder /go/src/gerrit.opencord.org/abstract-olt/bin/client /app/client
+RUN mkdir -p /app/backup
 
 EXPOSE 7777/tcp
 EXPOSE 7778/tcp
