@@ -43,6 +43,7 @@ type Server struct {
 Echo - Tester function which just returns same string sent to it
 */
 func (s *Server) Echo(ctx context.Context, in *EchoMessage) (*EchoReplyMessage, error) {
+	fmt.Println("HELLO WTF")
 	ping := in.GetPing()
 	pong := EchoReplyMessage{Pong: ping}
 	return &pong, nil
@@ -82,7 +83,7 @@ func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*Add
 	}
 
 	abstractChassis := abstract.GenerateChassis(clli, int(in.GetRack()), int(in.GetShelf()))
-	phyChassis := physical.Chassis{CLLI: clli, XOSAddress: xosAddress, Rack: rack, Shelf: shelf}
+	phyChassis := physical.Chassis{CLLI: clli, XOSUser: xosUser, XOSPassword: xosPassword, XOSAddress: xosAddress, Rack: rack, Shelf: shelf}
 
 	chassisHolder = &models.ChassisHolder{AbstractChassis: abstractChassis, PhysicalChassis: phyChassis}
 	if settings.GetDebug() {
