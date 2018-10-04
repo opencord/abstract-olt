@@ -251,14 +251,18 @@ Params:
 	for _, file := range files {
 		fmt.Println(file.Name())
 		chassisHolder := models.ChassisHolder{}
-		fileName := fmt.Sprintf("backup/%s", file.Name())
-		json, _ := ioutil.ReadFile(fileName)
-		err := chassisHolder.Deserialize([]byte(json))
-		if err != nil {
-			fmt.Printf("Deserialize threw an error %v\n", err)
+		if file.Name() != "BackupPlaceHolder" {
+			fileName := fmt.Sprintf("backup/%s", file.Name())
+			json, _ := ioutil.ReadFile(fileName)
+			err := chassisHolder.Deserialize([]byte(json))
+			if err != nil {
+				fmt.Printf("Deserialize threw an error %v\n", err)
+			}
+			chassisMap := models.GetChassisMap()
+			(*chassisMap)[file.Name()] = &chassisHolder
+		} else {
+			fmt.Println("Ignoring BackupPlaceHolder")
 		}
-		chassisMap := models.GetChassisMap()
-		(*chassisMap)[file.Name()] = &chassisHolder
 	}
 
 	log.Printf("Entering infinite loop")

@@ -1,7 +1,16 @@
-bin
 api/abstract_olt_api.pb.go
 api/abstract_olt_api.pb.gw.go
 api/abstract_olt_api.swagger.json
 client/client
 cmd/AbstractOLT/AbstractOLT
+bin/AbstractOLT
+bin/AbstractOLT.log
+bin/backup/ATLEDGEVOLT1
+bin/build.sh
+bin/buildParams.sh
+bin/cert/
+bin/demo.sh
+bin/output
+bin/client
+
 

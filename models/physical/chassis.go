@@ -125,5 +125,54 @@ func (chassis *Chassis) provisionONT(ont Ont) {
 }
 func (chassis *Chassis) deleteONT(ont Ont) {
 	//TODO - api call to provison s/c vlans and ont serial number etc
+	//TODO - api call to provison s/c vlans and ont serial number etc
 	log.Printf("chassis.deleteONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
+	ponPort := ont.Parent
+	slot := ponPort.Parent
+
+	//func NewOntProvision(serialNumber string, oltIP net.IP, ponPortNumber int) OntProvision {
+	ontStruct := tosca.NewOntProvision(ont.SerialNumber, slot.Address.IP, ponPort.Number)
+	yaml, _ := ontStruct.ToYaml()
+	fmt.Println(yaml)
+
+	requestList := fmt.Sprintf("http://%s:%d/delete", chassis.XOSAddress.IP.String(), chassis.XOSAddress.Port)
+	client := &http.Client{}
+	if settings.GetDummy() {
+		log.Printf("yaml:%s\n", yaml)
+		log.Println("YAML IS NOT BEING SET TO XOS")
+	} else {
+
+		log.Println(requestList)
+		log.Println(yaml)
+		if settings.GetDummy() {
+			return
+		}
+		req, err := http.NewRequest("POST", requestList, strings.NewReader(yaml))
+		req.Header.Add("xos-username", chassis.XOSUser)
+		req.Header.Add("xos-password", chassis.XOSPassword)
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("ERROR :) %v\n", err)
+			// handle error
+		}
+		log.Printf("Response is %v\n", resp)
+	}
+	deleteOntStruct := tosca.NewOntDelete(ont.SerialNumber)
+	yaml, _ = deleteOntStruct.ToYaml()
+	fmt.Println(yaml)
+	if settings.GetDummy() {
+		log.Printf("yaml:%s\n", yaml)
+		log.Println("YAML IS NOT BEING SET TO XOS")
+		return
+	} else {
+		req, err := http.NewRequest("POST", requestList, strings.NewReader(yaml))
+		req.Header.Add("xos-username", chassis.XOSUser)
+		req.Header.Add("xos-password", chassis.XOSPassword)
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("ERROR :) %v\n", err)
+			// handle error
+		}
+		log.Printf("Response is %v\n", resp)
+	}
 }
