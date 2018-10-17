@@ -18,24 +18,32 @@ package models
 
 import (
 	"encoding/json"
+	"log"
+
+	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
+	"gerrit.opencord.org/abstract-olt/models/abstract"
+	"gerrit.opencord.org/abstract-olt/models/physical"
 )
 
 func (chassisHolder ChassisHolder) Serialize() ([]byte, error) {
-	return json.Marshal(chassisHolder)
+	return json.Marshal(chassisHolder.PhysicalChassis)
 
 }
 
 func (chassisHolder *ChassisHolder) Deserialize(jsonData []byte) error {
-	err := json.Unmarshal(jsonData, chassisHolder)
+	physicalChassis := physical.Chassis{}
+	err := json.Unmarshal(jsonData, &physicalChassis)
 	if err != nil {
 		return err
 	}
-	physicalChassis := &chassisHolder.PhysicalChassis
-	abstractChassis := &chassisHolder.AbstractChassis
+	abstractChassis := abstract.GenerateChassis(physicalChassis.CLLI, 1, 1)
+	chassisHolder.AbstractChassis = abstractChassis
+	chassisHolder.PhysicalChassis = physicalChassis
+
 	//first handle abstract parent pointers
 	for i := 0; i < len(abstractChassis.Slots); i++ {
 		slot := &abstractChassis.Slots[i]
-		slot.Parent = abstractChassis
+		slot.Parent = &abstractChassis
 		for j := 0; j < len(slot.Ports); j++ {
 			port := &slot.Ports[j]
 			port.Parent = slot
@@ -47,7 +55,7 @@ func (chassisHolder *ChassisHolder) Deserialize(jsonData []byte) error {
 	//second handle physical parent pointers
 	for i := 0; i < len(physicalChassis.Linecards); i++ {
 		slot := physicalChassis.Linecards[i]
-		slot.Parent = physicalChassis
+		slot.Parent = &physicalChassis
 		for j := 0; j < len(slot.Ports); j++ {
 			port := &slot.Ports[j]
 			port.Parent = &slot
@@ -64,6 +72,9 @@ func (chassisHolder *ChassisHolder) Deserialize(jsonData []byte) error {
 			absPort, _ := chassisHolder.AbstractChassis.NextPort()
 			absPort.PhysPort = &slot.Ports[j]
 		}
+	}
+	if settings.GetDebug() {
+		log.Printf("created chassis %v\n", abstractChassis)
 	}
 	return nil
 }

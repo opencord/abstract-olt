@@ -18,6 +18,8 @@ package settings
 
 var debug = false
 var dummy = false
+var mongo = false
+var mongodb = ""
 
 /*
 SetDebug - sets debug setting
@@ -45,4 +47,16 @@ GetDummy - returns the current value of dummy
 */
 func GetDummy() bool {
 	return dummy
+}
+func SetMongo(useMongo bool) {
+	mongo = useMongo
+}
+func GetMongo() bool {
+	return mongo
+}
+func SetMongodb(connectString string) {
+	mongodb = connectString
+}
+func GetMongodb() string {
+	return mongodb
 }

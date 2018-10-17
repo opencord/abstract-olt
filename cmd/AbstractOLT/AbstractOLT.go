@@ -25,11 +25,14 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"gerrit.opencord.org/abstract-olt/api"
 	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
 	"gerrit.opencord.org/abstract-olt/models"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -186,6 +189,9 @@ func main() {
 	help := flag.Bool("help", false, "Show usage")
 	dummy := flag.Bool("dummy", false, "Run in dummy mode where YAML is not sent to XOS")
 
+	useMongo := flag.Bool("useMongo", false, "use mongo db for backup/restore")
+	mongodb := flag.String("mongodb", "mongodb://foundry:foundry@localhost:27017", "connect string for mongodb backup/restore")
+
 	flag.Parse()
 	settings.SetDummy(*dummy)
 
@@ -196,12 +202,17 @@ Params:
       -a [default false] : Run in Authentication mode currently very basic
       -listenAddress IP_ADDRESS [default localhost] -grpc_port [default 7777] PORT1 -rest_port [default 7778] PORT2: Listen for grpc on IP_ADDRESS:PORT1 and rest on IP_ADDRESS:PORT2
       -log_file [default $WORKING_DIR/AbstractOLT.log] LOG_FILE
+      -mongo [default false] use mongodb for backup restore
+      -mongodb [default mongodb://foundry:foundry@localhost:27017] connect string for mongodb - Required if mongo == true
       -h(elp) print this usage
+
 `
 		fmt.Println(usage)
 		return
 	}
 	settings.SetDebug(*debugPtr)
+	settings.SetMongo(*useMongo)
+	settings.SetMongodb(*mongodb)
 	fmt.Println("Startup Params: debug:", *debugPtr, " Authentication:", *useAuthentication, " SSL:", *useSsl, "Cert Directory", *certDirectory,
 		"ListenAddress:", *listenAddress, " grpc port:", *grpcPort, " rest port:", *restPort, "Logging to ", *logFile)
 
@@ -244,29 +255,70 @@ Params:
 	}()
 
 	// infinite loop
-	files, err := ioutil.ReadDir("backup")
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, file := range files {
-		fmt.Println(file.Name())
-		chassisHolder := models.ChassisHolder{}
-		if file.Name() != "BackupPlaceHolder" {
-			fileName := fmt.Sprintf("backup/%s", file.Name())
-			json, _ := ioutil.ReadFile(fileName)
-			err := chassisHolder.Deserialize([]byte(json))
+	if *useMongo {
+		client, err := mongo.NewClient(*mongodb)
+		client.Connect(context.Background())
+		defer client.Disconnect(context.Background())
+		if err != nil {
+			log.Fatalf("unable to connect to mongodb with %v\n", err)
+		}
+		collection := client.Database("AbstractOLT").Collection("backup")
+		cur, err := collection.Find(context.Background(), nil)
+		if err != nil {
+			log.Fatalf("Unable to connect to collection with %v\n", err)
+		}
+		defer cur.Close(context.Background())
+		for cur.Next(context.Background()) {
+			elem := bson.NewDocument()
+			err := cur.Decode(elem)
 			if err != nil {
-				fmt.Printf("Deserialize threw an error %v\n", err)
+				log.Fatal(err)
 			}
-			chassisMap := models.GetChassisMap()
-			(*chassisMap)[file.Name()] = &chassisHolder
-		} else {
-			fmt.Println("Ignoring BackupPlaceHolder")
+			clli := elem.LookupElement("_id").Value()
+			body := elem.LookupElement("body").Value()
+			_, bodyBin := (*body).Binary()
+
+			chassisHolder := models.ChassisHolder{}
+			err = chassisHolder.Deserialize(bodyBin)
+			if err != nil {
+				log.Printf("Deserialize threw an error for clli %s %v\n", (*clli).StringValue(), err)
+			} else {
+				chassisMap := models.GetChassisMap()
+				(*chassisMap)[(*clli).StringValue()] = &chassisHolder
+
+			}
+		}
+	} else {
+		files, err := ioutil.ReadDir("backup")
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, file := range files {
+			chassisHolder := models.ChassisHolder{}
+			if file.Name() != "BackupPlaceHolder" {
+				fileName := fmt.Sprintf("backup/%s", file.Name())
+				json, _ := ioutil.ReadFile(fileName)
+				err := chassisHolder.Deserialize([]byte(json))
+				if err != nil {
+					fmt.Printf("Deserialize threw an error %v\n", err)
+				}
+				chassisMap := models.GetChassisMap()
+				(*chassisMap)[file.Name()] = &chassisHolder
+			} else {
+				fmt.Println("Ignoring BackupPlaceHolder")
+			}
 		}
 	}
 
 	log.Printf("Entering infinite loop")
-	select {}
+	var ticker = time.NewTicker(60 * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			api.DoOutput()
+		}
+	}
+
 	//TODO publish periodic stats etc
 	fmt.Println("AbstractOLT")
 }

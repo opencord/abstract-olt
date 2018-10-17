@@ -45,7 +45,7 @@ type SimpleOLT struct {
 	Number         int
 	Ports          []PONPort
 	Active         bool
-	Parent         *Chassis `json:"-"`
+	Parent         *Chassis `json:"-" bson:"-"`
 	DataSwitchPort int
 }
 

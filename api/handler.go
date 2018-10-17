@@ -25,11 +25,15 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 
 	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
 	"gerrit.opencord.org/abstract-olt/models"
 	"gerrit.opencord.org/abstract-olt/models/abstract"
 	"gerrit.opencord.org/abstract-olt/models/physical"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/mongo/updateopt"
 	context "golang.org/x/net/context"
 )
 
@@ -39,10 +43,30 @@ Server instance of the grpc server
 type Server struct {
 }
 
+var syncChan chan bool
+var isDirty bool
+
+var runOnce sync.Once
+
+func getSyncChannel() chan bool {
+	runOnce.Do(func() {
+		syncChan = make(chan bool, 1)
+		syncChan <- true
+	})
+
+	return syncChan
+}
+func done(myChan chan bool, done bool) {
+	myChan <- done
+}
+
 /*
 Echo - Tester function which just returns same string sent to it
 */
 func (s *Server) Echo(ctx context.Context, in *EchoMessage) (*EchoReplyMessage, error) {
+	myChan := getSyncChannel()
+	<-myChan
+	defer done(myChan, true)
 	fmt.Println("HELLO WTF")
 	ping := in.GetPing()
 	pong := EchoReplyMessage{Pong: ping}
@@ -53,6 +77,10 @@ func (s *Server) Echo(ctx context.Context, in *EchoMessage) (*EchoReplyMessage, 
 CreateChassis - allocates a new Chassis struct and stores it in chassisMap
 */
 func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*AddChassisReturn, error) {
+	myChan := getSyncChannel()
+	fmt.Println("after getSyncChannel")
+	<-myChan
+	defer done(myChan, true)
 	chassisMap := models.GetChassisMap()
 	clli := in.GetCLLI()
 
@@ -92,6 +120,7 @@ func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*Add
 		log.Printf("new chassis %s\n", formatted)
 	}
 	(*chassisMap)[clli] = chassisHolder
+	isDirty = true
 	return &AddChassisReturn{DeviceID: clli}, nil
 }
 
@@ -99,6 +128,9 @@ func (s *Server) CreateChassis(ctx context.Context, in *AddChassisMessage) (*Add
 ChangeXOSUserPassword - allows update of xos credentials
 */
 func (s *Server) ChangeXOSUserPassword(ctx context.Context, in *ChangeXOSUserPasswordMessage) (*ChangeXOSUserPasswordReturn, error) {
+	myChan := getSyncChannel()
+	<-myChan
+	defer done(myChan, true)
 	clli := in.GetCLLI()
 	xosUser := in.GetXOSUser()
 	xosPassword := in.GetXOSPassword()
@@ -120,6 +152,7 @@ func (s *Server) ChangeXOSUserPassword(ctx context.Context, in *ChangeXOSUserPas
 
 	chassisHolder.PhysicalChassis.XOSUser = xosUser
 	chassisHolder.PhysicalChassis.XOSPassword = xosPassword
+	isDirty = true
 	return &ChangeXOSUserPasswordReturn{Success: true}, nil
 
 }
@@ -128,6 +161,9 @@ func (s *Server) ChangeXOSUserPassword(ctx context.Context, in *ChangeXOSUserPas
 CreateOLTChassis adds an OLT chassis/line card to the Physical chassis
 */
 func (s *Server) CreateOLTChassis(ctx context.Context, in *AddOLTChassisMessage) (*AddOLTChassisReturn, error) {
+	myChan := getSyncChannel()
+	<-myChan
+	defer done(myChan, true)
 	fmt.Printf(" CreateOLTChassis %v \n", *in)
 	chassisMap := models.GetChassisMap()
 	clli := in.GetCLLI()
@@ -154,6 +190,7 @@ func (s *Server) CreateOLTChassis(ctx context.Context, in *AddOLTChassisMessage)
 		absPort.PhysPort = &ports[i]
 		//AssignTraits(&ports[i], absPort)
 	}
+	isDirty = true
 	return &AddOLTChassisReturn{DeviceID: in.GetHostname(), ChassisDeviceID: clli}, nil
 
 }
@@ -162,6 +199,9 @@ func (s *Server) CreateOLTChassis(ctx context.Context, in *AddOLTChassisMessage)
 ProvisionOnt provisions an ONT on a specific Chassis/LineCard/Port
 */
 func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntReturn, error) {
+	myChan := getSyncChannel()
+	<-myChan
+	defer done(myChan, true)
 	chassisMap := models.GetChassisMap()
 	clli := in.GetCLLI()
 	chassisHolder := (*chassisMap)[clli]
@@ -174,6 +214,7 @@ func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntRe
 	if err != nil {
 		return nil, err
 	}
+	isDirty = true
 	return &AddOntReturn{Success: true}, nil
 }
 
@@ -181,6 +222,9 @@ func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntRe
 DeleteOnt - deletes a previously provision ont
 */
 func (s *Server) DeleteOnt(ctx context.Context, in *DeleteOntMessage) (*DeleteOntReturn, error) {
+	myChan := getSyncChannel()
+	<-myChan
+	defer done(myChan, true)
 	chassisMap := models.GetChassisMap()
 	clli := in.GetCLLI()
 	chassisHolder := (*chassisMap)[clli]
@@ -188,19 +232,70 @@ func (s *Server) DeleteOnt(ctx context.Context, in *DeleteOntMessage) (*DeleteOn
 	if err != nil {
 		return nil, err
 	}
+	isDirty = true
 	return &DeleteOntReturn{Success: true}, nil
 }
 
 func (s *Server) Output(ctx context.Context, in *OutputMessage) (*OutputReturn, error) {
-	chassisMap := models.GetChassisMap()
-	for clli, chassisHolder := range *chassisMap {
+	return DoOutput()
 
-		json, _ := (chassisHolder).Serialize()
-		backupFile := fmt.Sprintf("backup/%s", clli)
-		f, _ := os.Create(backupFile)
-		defer f.Close()
-		_, _ = f.WriteString(string(json))
-		f.Sync()
+}
+func DoOutput() (*OutputReturn, error) {
+	if isDirty {
+		myChan := getSyncChannel()
+		<-myChan
+		defer done(myChan, true)
+		chassisMap := models.GetChassisMap()
+		if settings.GetMongo() {
+			client, err := mongo.NewClient(settings.GetMongodb())
+			client.Connect(context.Background())
+			if err != nil {
+				log.Printf("client connect to mongo db @%s failed with %v\n", settings.GetMongodb(), err)
+			}
+			defer client.Disconnect(context.Background())
+			for clli, chassisHolder := range *chassisMap {
+				json, _ := (chassisHolder).Serialize()
+				collection := client.Database("AbstractOLT").Collection("backup")
+				doc := bson.NewDocument(bson.EC.String("_id", clli))
+				filter := bson.NewDocument(bson.EC.String("_id", clli))
+				doc.Append(bson.EC.Binary("body", json))
+
+				updateDoc := bson.NewDocument(bson.EC.SubDocument("$set", doc))
+				//update or insert if not existent
+				res, err := collection.UpdateOne(context.Background(), filter, updateDoc, updateopt.Upsert(true))
+				if err != nil {
+					log.Printf("collection.UpdateOne failed with %v\n", err)
+				} else {
+					id := res.UpsertedID
+					if settings.GetDebug() {
+						log.Printf("Update Succeeded with id %v\n", id)
+					}
+				}
+			}
+		} else {
+			for clli, chassisHolder := range *chassisMap {
+
+				json, _ := (chassisHolder).Serialize()
+				if settings.GetMongo() {
+
+				} else {
+					//TODO parameterize dump location
+					backupFile := fmt.Sprintf("backup/%s", clli)
+					f, _ := os.Create(backupFile)
+
+					defer f.Close()
+
+					_, _ = f.WriteString(string(json))
+					f.Sync()
+				}
+			}
+		}
+		isDirty = false
+	} else {
+		if settings.GetDebug() {
+			log.Print("Not dirty not dumping config")
+		}
+
 	}
 	return &OutputReturn{Success: true}, nil
 

@@ -20,12 +20,12 @@ package physical
 Ont represents a single ont/onu connect to a splitter on a Port
 */
 type Ont struct {
-	Number       int
-	Svlan        int
-	Cvlan        int
-	SerialNumber string
-	Parent       *PONPort `json:"-"`
-	Active       bool
-	NasPortID    string
-	CircuitID    string
+	Number       int      `json:",omitempty"`
+	Svlan        int      `,json:",omitempty"`
+	Cvlan        int      `,json:",omitempty"`
+	SerialNumber string   `,json:",omitempty"`
+	Parent       *PONPort `json:"-" bson:"-"`
+	Active       bool     `json:",omitempty"`
+	NasPortID    string   `json:",omitempty"`
+	CircuitID    string   `json:",omitempty"`
 }

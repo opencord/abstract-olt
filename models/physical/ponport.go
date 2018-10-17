@@ -27,7 +27,7 @@ type PONPort struct {
 	Number   int
 	DeviceID string
 	Onts     [64]Ont
-	Parent   *SimpleOLT `json:"-"`
+	Parent   *SimpleOLT `json:"-" bson:"-"`
 }
 
 /*
