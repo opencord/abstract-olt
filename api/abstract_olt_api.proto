@@ -78,6 +78,17 @@ message AddOntMessage{
    int32 OntNumber=4;
    string SerialNumber=5;
 }
+message AddOntFullMessage{
+   string CLLI=1;
+   int32 SlotNumber=2;
+   int32 PortNumber=3;
+   int32 OntNumber=4;
+   string SerialNumber=5;
+   uint32 STag=7;
+   uint32 CTag=8;
+   string NasPortID=9;
+   string CircuitID=10;
+}
 message AddOntReturn{
    bool Success=1;
 }
@@ -126,6 +137,12 @@ service AbstractOLT{
    rpc ProvisionOnt(AddOntMessage) returns (AddOntReturn) {
       option(google.api.http) = {
          post:"/v1/ProvsionOnt"
+	 body:"*"
+      };
+   }
+   rpc ProvisionOntFull(AddOntFullMessage) returns (AddOntReturn) {
+      option(google.api.http) = {
+         post:"/v1/ProvsionOtFull"
 	 body:"*"
       };
    }

@@ -47,31 +47,32 @@ func generatePort(n int, s *Slot) Port {
 
 	var onts [64]Ont
 	//i starts with 1 because :P Architects - blah
-	for i := 1; i < 65; i++ {
+	var i uint32
+	for i = 1; i < 65; i++ {
 		/* adding one because the system that provisions is 1 based on everything not 0 based*/
-		onts[i-1] = Ont{Number: i, Svlan: calculateSvlan(s.Number, n, i),
-			Cvlan: calculateCvlan(s.Number, n, i+1), Parent: &port}
+		onts[int(i-1)] = Ont{Number: int(i), Svlan: calculateSvlan(s.Number, n, int(i)),
+			Cvlan: calculateCvlan(s.Number, n, int(i+1)), Parent: &port}
 	}
 
 	port.Onts = onts
 	return port
 }
 
-func calculateCvlan(slot int, port int, ont int) int {
+func calculateCvlan(slot int, port int, ont int) uint32 {
 	ontPortOffset := 120 // Max(ONT_SLOT) * Max(ONT_PORT) = 10 * 12 = 120
 	ontSlotOffset := 12  //= Max(ONT_PORT) = 12
 	vlanOffset := 1      //(VID 1 is reserved)
 
-	cVid := ((ont-2)%32)*ontPortOffset + (slot-3)*ontSlotOffset + port + vlanOffset
+	cVid := uint32(((ont-2)%32)*ontPortOffset + (slot-3)*ontSlotOffset + port + vlanOffset)
 
 	return cVid
 }
 
-func calculateSvlan(slot int, port int, ont int) int {
+func calculateSvlan(slot int, port int, ont int) uint32 {
 	ltSlotOffset := 16
 	vlanGap := 288  // Max(LT_SLOT) * Max(ltSlotOffset) = 18 * 16 = 288
 	vlanOffset := 1 //(VID 1 is reserved)
-	sVid := ((slot-3)*ltSlotOffset + port) + ((ont-1)/32)*vlanGap + vlanOffset
+	sVid := uint32(((slot-3)*ltSlotOffset + port) + ((ont-1)/32)*vlanGap + vlanOffset)
 
 	return sVid
 }

@@ -31,14 +31,14 @@ import (
 
 func main() {
 	/* COMMAND FLAGS */
-	output := flag.Bool("output", false, "dump output")
 	echo := flag.Bool("e", false, "echo")
-	message := flag.String("message", "ping", "message to be echoed back")
 	create := flag.Bool("c", false, "create?")
 	update := flag.Bool("u", false, "update?")
 	addOlt := flag.Bool("s", false, "addOlt?")
 	provOnt := flag.Bool("o", false, "provisionOnt?")
+	provOntFull := flag.Bool("f", false, "provsionOntFull?")
 	deleteOnt := flag.Bool("d", false, "deleteOnt")
+	output := flag.Bool("output", false, "dump output")
 	/* END COMMAND FLAGS */
 
 	/* CREATE CHASSIS FLAGS */
@@ -65,6 +65,17 @@ func main() {
 	serial := flag.String("serial", "", "serial number of ont")
 	/* END PROVISION / DELETE ONT FLAGS */
 
+	/*PROVISION ONT FULL EXTRA FLAGS*/
+	stag := flag.Uint("stag", 0, "s-tag for ont")
+	ctag := flag.Uint("ctag", 0, "c-tag for ont")
+	nasPort := flag.String("nas_port", "", "NasPortID for ont")
+	circuitID := flag.String("circuit_id", "", "CircuitID for ont")
+	/*END PROVISION ONT FULL EXTRA FLAGS*/
+
+	/* ECHO FLAGS */
+	message := flag.String("message", "ping", "message to be echoed back")
+	/*END ECHO FLAGS*/
+
 	/*GENERIC FLAGS */
 	clli := flag.String("clli", "", "clli of abstract chassis")
 	useSsl := flag.Bool("ssl", false, "use ssl")
@@ -83,7 +94,7 @@ func main() {
 		}
 	}
 
-	cmdFlags := []*bool{echo, addOlt, update, create, provOnt, deleteOnt, output}
+	cmdFlags := []*bool{echo, addOlt, update, create, provOnt, provOntFull, deleteOnt, output}
 	cmdCount := 0
 	for _, flag := range cmdFlags {
 		if *flag {
@@ -141,6 +152,8 @@ func main() {
 		addOltChassis(c, clli, oltAddress, oltPort, name, driver, oltType)
 	} else if *provOnt {
 		provisionONT(c, clli, slot, port, ont, serial)
+	} else if *provOntFull {
+		provisionONTFull(c, clli, slot, port, ont, serial, stag, ctag, nasPort, circuitID)
 	} else if *echo {
 		ping(c, *message)
 	} else if *output {
@@ -264,7 +277,24 @@ func provisionONT(c api.AbstractOLTClient, clli *string, slot *uint, port *uint,
 	}
 	log.Printf("Response from server: %t", res.GetSuccess())
 	return nil
-
+}
+func provisionONTFull(c api.AbstractOLTClient, clli *string, slot *uint, port *uint, ont *uint, serial *string, stag *uint, ctag *uint, nasPort *string, circuitID *string) error {
+	fmt.Println("clli", *clli)
+	fmt.Println("slot", *slot)
+	fmt.Println("port", *port)
+	fmt.Println("ont", *ont)
+	fmt.Println("serial", *serial)
+	fmt.Println("stag", *stag)
+	fmt.Println("ctag", *ctag)
+	fmt.Println("nasPort", *nasPort)
+	fmt.Println("circuitID", *circuitID)
+	res, err := c.ProvisionOntFull(context.Background(), &api.AddOntFullMessage{CLLI: *clli, SlotNumber: int32(*slot), PortNumber: int32(*port), OntNumber: int32(*ont), SerialNumber: *serial, STag: uint32(*stag), CTag: uint32(*ctag), NasPortID: *nasPort, CircuitID: *circuitID})
+	if err != nil {
+		debug.PrintStack()
+		fmt.Printf("Error when calling ProvsionOnt %s", err)
+		return err
+	}
+	log.Printf("Response from server: %t", res.GetSuccess())
 	return nil
 }
 func deleteONT(c api.AbstractOLTClient, clli *string, slot *uint, port *uint, ont *uint, serial *string) error {
@@ -326,6 +356,18 @@ func usage() {
 	 -ont ONT_NUMBER [1-64]
 	 -serial ONT_SERIAL_NUM
 	 e.g. ./client -server=localhost:7777 -o -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf
+   -f provision ont full - same as -o above but allows explicit set of s/c vlans , NasPortID and CircuitID
+      params:
+	 -clli CLLI_NAME
+	 -slot SLOT_NUMBER [1-16]
+	 -port OLT_PORT_NUMBER [1-16]
+	 -ont ONT_NUMBER [1-64]
+	 -serial ONT_SERIAL_NUM
+	 -stag S_TAG
+	 -ctag C_TAG
+	 -nas_port NAS_PORT_ID
+	 -circuit_id CIRCUIT_ID
+	 e.g. ./client -server=localhost:7777 -f -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf -stag=33 -ctag=104 -nas_port="pon 1/1/1/3:1.1" -circuit_id="CLLI 1/1/1/13:1.1"
    -d delete ont - removes ont from service
       params:
 	 -clli CLLI_NAME

@@ -62,6 +62,11 @@ func (chassis *Chassis) NextPort() (*Port, error) {
 
 	return nextPort, nil
 }
+func (chassis *Chassis) ActivateONTFull(slotNumber int, portNumber int, ontNumber int, serialNumber string, cTag uint32, sTag uint32, nasPortID string, circuitID string) error {
+	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].provisionOntFull(ontNumber, serialNumber, cTag, sTag, nasPortID, circuitID)
+	return err
+}
+
 func (chassis *Chassis) ActivateONT(slotNumber int, portNumber int, ontNumber int, serialNumber string) error {
 	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].provisionOnt(ontNumber, serialNumber)
 	return err

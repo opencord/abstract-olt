@@ -217,6 +217,26 @@ func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntRe
 	isDirty = true
 	return &AddOntReturn{Success: true}, nil
 }
+func (s *Server) ProvisionOntFull(ctx context.Context, in *AddOntFullMessage) (*AddOntReturn, error) {
+	myChan := getSyncChannel()
+	<-myChan
+	defer done(myChan, true)
+	chassisMap := models.GetChassisMap()
+	clli := in.GetCLLI()
+	chassisHolder := (*chassisMap)[clli]
+	if chassisHolder == nil {
+		errString := fmt.Sprintf("There is no chassis with CLLI of %s", clli)
+		return &AddOntReturn{Success: false}, errors.New(errString)
+	}
+	err := chassisHolder.AbstractChassis.ActivateONTFull(int(in.GetSlotNumber()), int(in.GetPortNumber()), int(in.GetOntNumber()), in.GetSerialNumber(),
+		in.GetCTag(), in.GetSTag(), in.GetNasPortID(), in.GetCircuitID())
+
+	if err != nil {
+		return nil, err
+	}
+	isDirty = true
+	return &AddOntReturn{Success: true}, nil
+}
 
 /*
 DeleteOnt - deletes a previously provision ont

@@ -21,8 +21,8 @@ Ont represents a single ont/onu connect to a splitter on a Port
 */
 type Ont struct {
 	Number       int      `json:",omitempty"`
-	Svlan        int      `,json:",omitempty"`
-	Cvlan        int      `,json:",omitempty"`
+	Svlan        uint32   `,json:",omitempty"`
+	Cvlan        uint32   `,json:",omitempty"`
 	SerialNumber string   `,json:",omitempty"`
 	Parent       *PONPort `json:"-" bson:"-"`
 	Active       bool     `json:",omitempty"`

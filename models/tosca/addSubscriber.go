@@ -52,8 +52,8 @@ type SubscriberProvision struct {
 				Properties struct {
 					Name      string `yaml:"name"`
 					Status    string `yaml:"status"`
-					CTag      int    `yaml:"c_tag"`
-					STag      int    `yaml:"s_tag"`
+					CTag      uint32 `yaml:"c_tag"`
+					STag      uint32 `yaml:"s_tag"`
 					OnuDevice string `yaml:"onu_device"`
 					NasPortID string `yaml:"nas_port_id"`
 					CircuitID string `yaml:"circuit_id"`
@@ -64,7 +64,7 @@ type SubscriberProvision struct {
 	} `yaml:"topology_template"`
 }
 
-func NewSubscriberProvision(name string, cTag int, sTag int, onuDevice string, nasPortID string, circuitID string, remoteID string) SubscriberProvision {
+func NewSubscriberProvision(name string, cTag uint32, sTag uint32, onuDevice string, nasPortID string, circuitID string, remoteID string) SubscriberProvision {
 	s := SubscriberProvision{}
 	err := yaml.Unmarshal([]byte(subSubscriberTemplate), &s)
 	if err != nil {

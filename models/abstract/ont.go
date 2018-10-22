@@ -21,7 +21,7 @@ Ont represents a single ont/onu connect to a splitter on a Port
 */
 type Ont struct {
 	Number int
-	Svlan  int
-	Cvlan  int
+	Svlan  uint32
+	Cvlan  uint32
 	Parent *Port `json:"-"`
 }

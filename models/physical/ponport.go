@@ -67,7 +67,7 @@ func (e *AllReadyDeactivatedError) Error() string {
 /*
 ActivateOnt - passes ont information to chassis to make call to NEM to activate (whitelist) ont
 */
-func (port *PONPort) ActivateOnt(number int, sVlan int, cVlan int, serialNumber string, nasPortID string, circuitID string) error {
+func (port *PONPort) ActivateOnt(number int, sVlan uint32, cVlan uint32, serialNumber string, nasPortID string, circuitID string) error {
 	slot := port.Parent
 	chassis := slot.Parent
 
@@ -86,7 +86,7 @@ func (port *PONPort) ActivateOnt(number int, sVlan int, cVlan int, serialNumber 
 /*
 DeleteOnt - passes ont information to chassis to make call to NEM to de-activate (de-whitelist) ont
 */
-func (port *PONPort) DeleteOnt(number int, sVlan int, cVlan int, serialNumber string) error {
+func (port *PONPort) DeleteOnt(number int, sVlan uint32, cVlan uint32, serialNumber string) error {
 	slot := port.Parent
 	chassis := slot.Parent
 	if port.Onts[number-1].Active != true {

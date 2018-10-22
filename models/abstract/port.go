@@ -51,10 +51,22 @@ func (e *UnprovisonedPortError) Error() string {
 func (port *Port) provisionOnt(ontNumber int, serialNumber string) error {
 
 	slot := port.Parent
-	chassis := *slot.Parent
+	chassis := slot.Parent
 	baseID := fmt.Sprintf("%d/%d/%d/%d:%d.1.1", chassis.Rack, chassis.Shelf, slot.Number, port.Number, ontNumber)
 	nasPortID := fmt.Sprintf("PON %s", baseID)
 	circuitID := fmt.Sprintf("%s %s", chassis.CLLI, baseID)
+
+	if port.PhysPort == nil {
+		err := UnprovisonedPortError{oltNum: slot.Number, clli: chassis.CLLI, portNum: port.Number}
+		return &err
+	}
+	phyPort := port.PhysPort
+	ont := port.Onts[ontNumber-1]
+	err := phyPort.ActivateOnt(ontNumber, ont.Svlan, ont.Cvlan, serialNumber, nasPortID, circuitID)
+	return err
+}
+func (port *Port) provisionOntFull(ontNumber int, serialNumber string, cTag uint32, sTag uint32, nasPortID string, circuitID string) error {
+	slot := port.Parent
 
 	if port.PhysPort == nil {
 		chassis := slot.Parent
@@ -62,8 +74,7 @@ func (port *Port) provisionOnt(ontNumber int, serialNumber string) error {
 		return &err
 	}
 	phyPort := port.PhysPort
-	ont := port.Onts[ontNumber-1]
-	err := phyPort.ActivateOnt(ontNumber, ont.Svlan, ont.Cvlan, serialNumber, nasPortID, circuitID)
+	err := phyPort.ActivateOnt(ontNumber, sTag, cTag, serialNumber, nasPortID, circuitID)
 	return err
 }
 func (port *Port) deleteOnt(ontNumber int, serialNumber string) error {
