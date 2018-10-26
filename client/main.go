@@ -39,6 +39,7 @@ func main() {
 	provOntFull := flag.Bool("f", false, "provsionOntFull?")
 	deleteOnt := flag.Bool("d", false, "deleteOnt")
 	output := flag.Bool("output", false, "dump output")
+	reflow := flag.Bool("reflow", false, "reflow provisioning tosca")
 	/* END COMMAND FLAGS */
 
 	/* CREATE CHASSIS FLAGS */
@@ -94,7 +95,7 @@ func main() {
 		}
 	}
 
-	cmdFlags := []*bool{echo, addOlt, update, create, provOnt, provOntFull, deleteOnt, output}
+	cmdFlags := []*bool{echo, addOlt, update, create, provOnt, provOntFull, deleteOnt, output, reflow}
 	cmdCount := 0
 	for _, flag := range cmdFlags {
 		if *flag {
@@ -160,6 +161,8 @@ func main() {
 		Output(c)
 	} else if *deleteOnt {
 		deleteONT(c, clli, slot, port, ont, serial)
+	} else if *reflow {
+		reflowTosca(c)
 	}
 
 }
@@ -312,6 +315,16 @@ func deleteONT(c api.AbstractOLTClient, clli *string, slot *uint, port *uint, on
 	log.Printf("Response from server: %t", res.GetSuccess())
 	return nil
 }
+func reflowTosca(c api.AbstractOLTClient) error {
+	res, err := c.Reflow(context.Background(), &api.ReflowMessage{})
+	if err != nil {
+		debug.PrintStack()
+		fmt.Printf("Error when calling Reflow %s", err)
+		return err
+	}
+	log.Printf("Response from server: %t", res.GetSuccess())
+	return nil
+}
 
 func usage() {
 	var output = `
@@ -378,6 +391,8 @@ func usage() {
 	 e.g. ./client -server=localhost:7777 -d -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf
     -output (TEMPORARY) causes AbstractOLT to serialize all chassis to JSON file in $WorkingDirectory/backups
          e.g. ./client -server=localhost:7777 -output
+    -reflow causes tosca to be repushed to xos
+	e.g. ./client -server=localhost:7777 -reflow
 	 `
 
 	fmt.Println(output)

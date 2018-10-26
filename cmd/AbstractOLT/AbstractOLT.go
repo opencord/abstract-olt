@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"gerrit.opencord.org/abstract-olt/api"
+	"gerrit.opencord.org/abstract-olt/internal/pkg/impl"
 	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
 	"gerrit.opencord.org/abstract-olt/models"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -315,7 +316,7 @@ Params:
 	for {
 		select {
 		case <-ticker.C:
-			api.DoOutput()
+			impl.DoOutput()
 		}
 	}
 

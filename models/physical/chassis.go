@@ -60,8 +60,14 @@ AddOLTChassis - adds a reference to a new olt chassis
 func (chassis *Chassis) AddOLTChassis(olt SimpleOLT) {
 	olt.SetNumber((len(chassis.Linecards) + 1))
 	chassis.Linecards = append(chassis.Linecards, olt)
-	//TODO - api call to add olt i.e. preprovision_olt
-	//S>103 func NewOltProvision(name string, deviceType string, host string, port int) OltProvsion {
+	chassis.SendOltTosca(olt)
+
+}
+
+/*
+SendOltTosca - Broke above method apart to support Reflow
+*/
+func (chassis *Chassis) SendOltTosca(olt SimpleOLT) {
 	ipString := olt.GetAddress().IP.String()
 	webServerPort := olt.GetAddress().Port
 	oltStruct := tosca.NewOltProvision(chassis.CLLI, olt.GetHostname(), "openolt", ipString, webServerPort)
@@ -82,15 +88,16 @@ func (chassis *Chassis) AddOLTChassis(olt SimpleOLT) {
 		// handle error
 	}
 	log.Printf("Server response was %v\n", resp)
-
 }
 func (chassis *Chassis) provisionONT(ont Ont) {
 	//TODO - api call to provison s/c vlans and ont serial number etc
 	log.Printf("chassis.provisionONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
+	chassis.SendOntTosca(ont)
+	chassis.SendSubscriberTosca(ont)
+}
+func (chassis *Chassis) SendOntTosca(ont Ont) {
 	ponPort := ont.Parent
 	slot := ponPort.Parent
-
-	//func NewOntProvision(serialNumber string, oltIP net.IP, ponPortNumber int) OntProvision {
 	ontStruct := tosca.NewOntProvision(ont.SerialNumber, slot.Address.IP, ponPort.Number)
 	yaml, _ := ontStruct.ToYaml()
 
@@ -110,22 +117,32 @@ func (chassis *Chassis) provisionONT(ont Ont) {
 		// handle error
 	}
 	log.Printf("Response is %v\n", resp)
+}
+func (chassis *Chassis) SendSubscriberTosca(ont Ont) {
+	ponPort := ont.Parent
+	slot := ponPort.Parent
+	requestList := fmt.Sprintf("http://%s:%d/run", chassis.XOSAddress.IP.String(), chassis.XOSAddress.Port)
 	rgName := fmt.Sprintf("%s_%d_%d_%d_RG", chassis.CLLI, slot.Number, ponPort.Number, ont.Number)
 	subStruct := tosca.NewSubscriberProvision(rgName, ont.Cvlan, ont.Svlan, ont.SerialNumber, ont.NasPortID, ont.CircuitID, chassis.CLLI)
-	yaml, _ = subStruct.ToYaml()
-	log.Printf("yaml:%s\n", yaml)
-	req, err = http.NewRequest("POST", requestList, strings.NewReader(yaml))
-	req.Header.Add("xos-username", chassis.XOSUser)
-	req.Header.Add("xos-password", chassis.XOSPassword)
-	resp, err = client.Do(req)
-	if err != nil {
-		log.Printf("ERROR :) %v\n", err)
-		// handle error
+	yaml, _ := subStruct.ToYaml()
+	if settings.GetDummy() {
+		log.Printf("yaml:%s\n", yaml)
+		log.Println("YAML IS NOT BEING SET TO XOS")
+	} else {
+		req, err := http.NewRequest("POST", requestList, strings.NewReader(yaml))
+		req.Header.Add("xos-username", chassis.XOSUser)
+		req.Header.Add("xos-password", chassis.XOSPassword)
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("ERROR :) %v\n", err)
+			// handle error
+		}
+		log.Printf("Response is %v\n", resp)
+
 	}
 }
 func (chassis *Chassis) deleteONT(ont Ont) {
-	//TODO - api call to provison s/c vlans and ont serial number etc
-	//TODO - api call to provison s/c vlans and ont serial number etc
 	log.Printf("chassis.deleteONT(%s,SVlan:%d,CVlan:%d)\n", ont.SerialNumber, ont.Svlan, ont.Cvlan)
 	ponPort := ont.Parent
 	slot := ponPort.Parent
