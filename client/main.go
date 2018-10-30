@@ -40,6 +40,8 @@ func main() {
 	deleteOnt := flag.Bool("d", false, "deleteOnt")
 	output := flag.Bool("output", false, "dump output")
 	reflow := flag.Bool("reflow", false, "reflow provisioning tosca")
+	fullInventory := flag.Bool("full_inventory", false, "pull full inventory json")
+	inventory := flag.Bool("inventory", false, "pull json inventory for a specific clli")
 	/* END COMMAND FLAGS */
 
 	/* CREATE CHASSIS FLAGS */
@@ -95,7 +97,7 @@ func main() {
 		}
 	}
 
-	cmdFlags := []*bool{echo, addOlt, update, create, provOnt, provOntFull, deleteOnt, output, reflow}
+	cmdFlags := []*bool{echo, addOlt, update, create, provOnt, provOntFull, deleteOnt, output, reflow, fullInventory, inventory}
 	cmdCount := 0
 	for _, flag := range cmdFlags {
 		if *flag {
@@ -163,6 +165,10 @@ func main() {
 		deleteONT(c, clli, slot, port, ont, serial)
 	} else if *reflow {
 		reflowTosca(c)
+	} else if *fullInventory {
+		getFullInventory(c)
+	} else if *inventory {
+		getInventory(c, clli)
 	}
 
 }
@@ -323,6 +329,26 @@ func reflowTosca(c api.AbstractOLTClient) error {
 		return err
 	}
 	log.Printf("Response from server: %t", res.GetSuccess())
+	return nil
+}
+func getFullInventory(c api.AbstractOLTClient) error {
+	res, err := c.GetFullInventory(context.Background(), &api.FullInventoryMessage{})
+	if err != nil {
+		debug.PrintStack()
+		fmt.Printf("Error when calling Reflow %s", err)
+		return err
+	}
+	log.Println(res.GetJsonDump())
+	return nil
+}
+func getInventory(c api.AbstractOLTClient, clli *string) error {
+	res, err := c.GetInventory(context.Background(), &api.InventoryMessage{Clli: *clli})
+	if err != nil {
+		debug.PrintStack()
+		fmt.Printf("Error when calling Reflow %s", err)
+		return err
+	}
+	log.Println(res.GetJsonDump())
 	return nil
 }
 

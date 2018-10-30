@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"gerrit.opencord.org/abstract-olt/internal/pkg/impl"
+	"gerrit.opencord.org/abstract-olt/models/inventory"
 	context "golang.org/x/net/context"
 )
 
@@ -130,7 +131,7 @@ func (s *Server) ProvisionOnt(ctx context.Context, in *AddOntMessage) (*AddOntRe
 }
 
 /*
-ProvsionOntFull - provisions ont using sTag,cTag,NasPortID, and CircuitID passed in
+ProvisionOntFull - provisions ont using sTag,cTag,NasPortID, and CircuitID passed in
 */
 func (s *Server) ProvisionOntFull(ctx context.Context, in *AddOntFullMessage) (*AddOntReturn, error) {
 	clli := in.GetCLLI()
@@ -159,13 +160,36 @@ func (s *Server) DeleteOnt(ctx context.Context, in *DeleteOntMessage) (*DeleteOn
 	return &DeleteOntReturn{Success: success}, err
 }
 
+/*
+Reflow - iterates through provisioning to rebuild Seba-Pod
+*/
 func (s *Server) Reflow(ctx context.Context, in *ReflowMessage) (*ReflowReturn, error) {
 	success, err := impl.Reflow()
 	return &ReflowReturn{Success: success}, err
 
 }
+
+/*
+Output - causes an immediate backup to be created
+*/
 func (s *Server) Output(ctx context.Context, in *OutputMessage) (*OutputReturn, error) {
 	success, err := impl.DoOutput()
 	return &OutputReturn{Success: success}, err
 
+}
+
+/*
+GetFullInventory - gets a full json dump of the currently provisioned equipment
+*/
+func (s *Server) GetFullInventory(ctx context.Context, in *FullInventoryMessage) (*InventoryReturn, error) {
+	json := inventory.GatherAllInventory()
+	return &InventoryReturn{JsonDump: json}, nil
+}
+
+/*
+GetInventory - returns a json dump of a particular seba-pod
+*/
+func (s *Server) GetInventory(ctx context.Context, in *InventoryMessage) (*InventoryReturn, error) {
+	json := inventory.GatherInventory(in.GetClli())
+	return &InventoryReturn{JsonDump: json}, nil
 }
