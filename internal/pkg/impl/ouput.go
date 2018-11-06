@@ -24,7 +24,7 @@ import (
 	"gerrit.opencord.org/abstract-olt/models"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/updateopt"
+	"github.com/mongodb/mongo-go-driver/options"
 	context "golang.org/x/net/context"
 )
 
@@ -53,7 +53,8 @@ func DoOutput() (bool, error) {
 
 				updateDoc := bson.NewDocument(bson.EC.SubDocument("$set", doc))
 				//update or insert if not existent
-				res, err := collection.UpdateOne(context.Background(), filter, updateDoc, updateopt.Upsert(true))
+				upsert := true
+				res, err := collection.UpdateOne(context.Background(), filter, updateDoc, &options.UpdateOptions{Upsert: &upsert})
 				if err != nil {
 					log.Printf("collection.UpdateOne failed with %v\n", err)
 				} else {

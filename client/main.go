@@ -363,6 +363,7 @@ func usage() {
       params:
 	 -message string to be echoed back from the server
 	 e.g. ./client -server=localhost:7777 -e -message MESSAGE_TO_BE_ECHOED
+
    -c create chassis
       params:
          -clli CLLI_NAME
@@ -373,11 +374,13 @@ func usage() {
 	 -rack [optional default 1]
 	 -shelf [optional default 1]
 	 e.g. ./client -server=localhost:7777 -c -clli MY_CLLI -xos_user foundry -xos_password password -xos_address 192.168.0.1 -xos_port 30007 -rack 1 -shelf 1
+
    -u update xos user/password
          -clli CLLI_NAME
 	 -xos_user XOS_USER
 	 -xos_password XOS_PASSWORD
 	 e.g. ./client -server=localhost:7777 -u -clli MY_CLLI -xos_user NEW_USER -xos_password NEW_PASSWORD
+
    -s add physical olt chassis to chassis
       params:
          -clli CLLI_NAME - identifies abstract chassis to assign olt chassis to
@@ -387,6 +390,7 @@ func usage() {
 	 -driver [openolt,asfvolt16,adtran,tibits] - used to tell XOS which driver should be used to manange chassis
 	 -type [edgecore,adtran,tibit] - used to tell AbstractOLT how many ports are available on olt chassis
 	 e.g. ./client -server abstractOltHost:7777 -s -clli MY_CLLI -olt_address 192.168.1.100 -olt_port=9191 -name=slot1 -driver=openolt -type=adtran
+
    -o provision ont - adds ont to whitelist in XOS  on a specific port on a specific olt chassis based on abstract -> phyisical mapping
       params:
 	 -clli CLLI_NAME
@@ -395,6 +399,7 @@ func usage() {
 	 -ont ONT_NUMBER [1-64]
 	 -serial ONT_SERIAL_NUM
 	 e.g. ./client -server=localhost:7777 -o -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf
+
    -f provision ont full - same as -o above but allows explicit set of s/c vlans , NasPortID and CircuitID
       params:
 	 -clli CLLI_NAME
@@ -407,6 +412,7 @@ func usage() {
 	 -nas_port NAS_PORT_ID
 	 -circuit_id CIRCUIT_ID
 	 e.g. ./client -server=localhost:7777 -f -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf -stag=33 -ctag=104 -nas_port="pon 1/1/1/3:1.1" -circuit_id="CLLI 1/1/1/13:1.1"
+
    -d delete ont - removes ont from service
       params:
 	 -clli CLLI_NAME
@@ -415,10 +421,21 @@ func usage() {
 	 -ont ONT_NUMBER [1-64]
 	 -serial ONT_SERIAL_NUM
 	 e.g. ./client -server=localhost:7777 -d -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf
+
     -output (TEMPORARY) causes AbstractOLT to serialize all chassis to JSON file in $WorkingDirectory/backups
          e.g. ./client -server=localhost:7777 -output
+
     -reflow causes tosca to be repushed to xos
 	e.g. ./client -server=localhost:7777 -reflow
+
+    -inventory - returns a json document that describes currently provisioned equipment for a specific clli
+      params:
+	 -clli CLLI_NAME
+	 e.g. ./client -inventory -clli=ATLEDGEVOLT1
+
+    -full_inventory - returns a json document that describes all currently provisioned pods
+         e.g. ./client -full_inventory
+        
 	 `
 
 	fmt.Println(output)

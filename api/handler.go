@@ -57,7 +57,6 @@ func (s *Server) Echo(ctx context.Context, in *EchoMessage) (*EchoReplyMessage, 
 	myChan := getSyncChannel()
 	<-myChan
 	defer done(myChan, true)
-	fmt.Println("HELLO WTF")
 	ping := in.GetPing()
 	pong := EchoReplyMessage{Pong: ping}
 	return &pong, nil
@@ -190,6 +189,6 @@ func (s *Server) GetFullInventory(ctx context.Context, in *FullInventoryMessage)
 GetInventory - returns a json dump of a particular seba-pod
 */
 func (s *Server) GetInventory(ctx context.Context, in *InventoryMessage) (*InventoryReturn, error) {
-	json := inventory.GatherInventory(in.GetClli())
-	return &InventoryReturn{JsonDump: json}, nil
+	json, err := inventory.GatherInventory(in.GetClli())
+	return &InventoryReturn{JsonDump: json}, err
 }

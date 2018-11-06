@@ -17,6 +17,8 @@ package inventory
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net"
 
 	"gerrit.opencord.org/abstract-olt/models"
@@ -64,12 +66,19 @@ func GatherAllInventory() string {
 	return string(bytes)
 }
 
-func GatherInventory(clli string) string {
+func GatherInventory(clli string) (string, error) {
+	if clli == "" {
+		return "", errors.New("You must provide a CLLI")
+	}
 	chassisMap := models.GetChassisMap()
 	chassisHolder := (*chassisMap)[clli]
+	if chassisHolder == nil {
+		errorMsg := fmt.Sprintf("No Chassis Holder found for CLLI %s", clli)
+		return "", errors.New(errorMsg)
+	}
 	chassis := parseClli(clli, chassisHolder)
 	bytes, _ := json.Marshal(chassis)
-	return string(bytes)
+	return string(bytes), nil
 }
 
 func parseClli(clli string, chassisHolder *models.ChassisHolder) Chassis {
