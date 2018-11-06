@@ -70,7 +70,7 @@ SendOltTosca - Broke above method apart to support Reflow
 func (chassis *Chassis) SendOltTosca(olt SimpleOLT) {
 	ipString := olt.GetAddress().IP.String()
 	webServerPort := olt.GetAddress().Port
-	oltStruct := tosca.NewOltProvision(chassis.CLLI, olt.GetHostname(), "openolt", ipString, webServerPort)
+	oltStruct := tosca.NewOltProvision(chassis.CLLI, olt.GetHostname(), olt.Driver, ipString, webServerPort)
 	yaml, _ := oltStruct.ToYaml()
 	if settings.GetDummy() {
 		log.Printf("yaml:%s\n", yaml)

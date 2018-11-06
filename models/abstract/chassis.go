@@ -18,6 +18,7 @@ package abstract
 
 import (
 	"errors"
+	"fmt"
 )
 
 const MAX_SLOTS int = 16
@@ -63,15 +64,52 @@ func (chassis *Chassis) NextPort() (*Port, error) {
 	return nextPort, nil
 }
 func (chassis *Chassis) ActivateONTFull(slotNumber int, portNumber int, ontNumber int, serialNumber string, cTag uint32, sTag uint32, nasPortID string, circuitID string) error {
+	if slotNumber > len(chassis.Slots) {
+		errorMsg := fmt.Sprintf("Invalid slot Number %d ", slotNumber)
+		return errors.New(errorMsg)
+	}
+	if portNumber > 16 {
+		errorMsg := fmt.Sprintf("Invalid port Number %d ", portNumber)
+		return errors.New(errorMsg)
+	}
+	if ontNumber > 64 {
+		errorMsg := fmt.Sprintf("Invalid ont Number %d ", ontNumber)
+		return errors.New(errorMsg)
+	}
+
 	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].provisionOntFull(ontNumber, serialNumber, cTag, sTag, nasPortID, circuitID)
 	return err
 }
 
 func (chassis *Chassis) ActivateONT(slotNumber int, portNumber int, ontNumber int, serialNumber string) error {
+	if slotNumber > len(chassis.Slots) {
+		errorMsg := fmt.Sprintf("Invalid slot Number %d ", slotNumber)
+		return errors.New(errorMsg)
+	}
+	if portNumber > 16 {
+		errorMsg := fmt.Sprintf("Invalid port Number %d ", portNumber)
+		return errors.New(errorMsg)
+	}
+	if ontNumber > 64 {
+		errorMsg := fmt.Sprintf("Invalid ont Number %d ", ontNumber)
+		return errors.New(errorMsg)
+	}
 	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].provisionOnt(ontNumber, serialNumber)
 	return err
 }
 func (chassis *Chassis) DeleteONT(slotNumber int, portNumber int, ontNumber int, serialNumber string) error {
+	if slotNumber > len(chassis.Slots) {
+		errorMsg := fmt.Sprintf("Invalid slot Number %d ", slotNumber)
+		return errors.New(errorMsg)
+	}
+	if portNumber > 16 {
+		errorMsg := fmt.Sprintf("Invalid port Number %d ", portNumber)
+		return errors.New(errorMsg)
+	}
+	if ontNumber > 64 {
+		errorMsg := fmt.Sprintf("Invalid ont Number %d ", ontNumber)
+		return errors.New(errorMsg)
+	}
 	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].deleteOnt(ontNumber, serialNumber)
 	return err
 }

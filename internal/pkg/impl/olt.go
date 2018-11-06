@@ -28,7 +28,7 @@ import (
 /*
 CreateOLTChassis adds an OLT chassis/line card to the Physical chassis
 */
-func CreateOLTChassis(clli string, oltType string, address net.TCPAddr, hostname string) (string, error) {
+func CreateOLTChassis(clli string, oltType string, driver string, address net.TCPAddr, hostname string) (string, error) {
 	myChan := getSyncChannel()
 	<-myChan
 	defer done(myChan, true)
@@ -39,21 +39,24 @@ func CreateOLTChassis(clli string, oltType string, address net.TCPAddr, hostname
 		return "", errors.New(errString)
 	}
 	physicalChassis := &chassisHolder.PhysicalChassis
-	sOlt := physical.SimpleOLT{CLLI: clli, Hostname: hostname, Address: address, Parent: physicalChassis}
+	sOlt := physical.SimpleOLT{CLLI: clli, Hostname: hostname, Driver: driver, Address: address, Parent: physicalChassis}
 	switch oltType {
 	case "edgecore":
 		sOlt.CreateEdgecore()
 	case "adtran":
 	case "tibit":
 	}
-	physicalChassis.AddOLTChassis(sOlt)
 	ports := sOlt.GetPorts()
 	for i := 0; i < len(ports); i++ {
-		absPort, _ := chassisHolder.AbstractChassis.NextPort()
-
+		absPort, err := chassisHolder.AbstractChassis.NextPort()
+		if err != nil {
+			fmt.Println(err)
+			return "", err
+		}
 		absPort.PhysPort = &ports[i]
 		//AssignTraits(&ports[i], absPort)
 	}
+	physicalChassis.AddOLTChassis(sOlt)
 	isDirty = true
 	return clli, nil
 

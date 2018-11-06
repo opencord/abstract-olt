@@ -42,6 +42,7 @@ type SimpleOLT struct {
 	CLLI           string
 	Hostname       string
 	Address        net.TCPAddr
+	Driver         string
 	Number         int
 	Ports          []PONPort
 	Active         bool

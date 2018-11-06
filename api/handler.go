@@ -110,9 +110,10 @@ CreateOLTChassis adds an OLT chassis/line card to the Physical chassis
 func (s *Server) CreateOLTChassis(ctx context.Context, in *AddOLTChassisMessage) (*AddOLTChassisReturn, error) {
 	clli := in.GetCLLI()
 	oltType := in.GetType().String()
+	driver := in.GetDriver().String()
 	address := net.TCPAddr{IP: net.ParseIP(in.GetSlotIP()), Port: int(in.GetSlotPort())}
 	hostname := in.GetHostname()
-	clli, err := impl.CreateOLTChassis(clli, oltType, address, hostname)
+	clli, err := impl.CreateOLTChassis(clli, oltType, driver, address, hostname)
 	return &AddOLTChassisReturn{DeviceID: hostname, ChassisDeviceID: clli}, err
 }
 
