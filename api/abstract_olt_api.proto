@@ -78,16 +78,28 @@ message AddOntMessage{
    int32 OntNumber=4;
    string SerialNumber=5;
 }
+message PreProvisionOntMessage{
+   string CLLI=1;
+   int32 SlotNumber=2;
+   int32 PortNumber=3;
+   int32 OntNumber=4;
+   uint32 STag=5;
+   uint32 CTag=6;
+   string NasPortID=7;
+   string CircuitID=8;
+   string TechProfile=9;
+   string SpeedProfile=10;
+}
 message AddOntFullMessage{
    string CLLI=1;
    int32 SlotNumber=2;
    int32 PortNumber=3;
    int32 OntNumber=4;
    string SerialNumber=5;
-   uint32 STag=7;
-   uint32 CTag=8;
-   string NasPortID=9;
-   string CircuitID=10;
+   uint32 STag=6;
+   uint32 CTag=7;
+   string NasPortID=8;
+   string CircuitID=9;
 }
 message AddOntReturn{
    bool Success=1;
@@ -144,6 +156,18 @@ service AbstractOLT{
    rpc CreateOLTChassis(AddOLTChassisMessage) returns (AddOLTChassisReturn) {
       option(google.api.http) = {
          post: "/v1/CreateOLTChassis"
+	 body:"*"
+      };
+   }
+   rpc PreProvisionOnt(PreProvisionOntMessage) returns (AddOntReturn) {
+      option(google.api.http) = {
+         post:"/v1/PreProvsionOnt"
+	 body:"*"
+      };
+   }
+   rpc ActivateSerial(AddOntMessage) returns (AddOntReturn) {
+      option(google.api.http) = {
+         post:"/v1/ActivateSerial"
 	 body:"*"
       };
    }

@@ -65,6 +65,30 @@ func (port *Port) provisionOnt(ontNumber int, serialNumber string) error {
 	err := phyPort.ActivateOnt(ontNumber, ont.Svlan, ont.Cvlan, serialNumber, nasPortID, circuitID)
 	return err
 }
+func (port *Port) preProvisionOnt(ontNumber int, cTag uint32, sTag uint32, nasPortID string, circuitID string, techProfile string, speedProfile string) error {
+	slot := port.Parent
+
+	if port.PhysPort == nil {
+		chassis := slot.Parent
+		err := UnprovisonedPortError{oltNum: slot.Number, clli: chassis.CLLI, portNum: port.Number}
+		return &err
+	}
+	phyPort := port.PhysPort
+	err := phyPort.PreProvisionOnt(ontNumber, sTag, cTag, nasPortID, circuitID, techProfile, speedProfile)
+	return err
+}
+func (port *Port) activateSerial(ontNumber int, serialNumber string) error {
+	slot := port.Parent
+
+	if port.PhysPort == nil {
+		chassis := slot.Parent
+		err := UnprovisonedPortError{oltNum: slot.Number, clli: chassis.CLLI, portNum: port.Number}
+		return &err
+	}
+	phyPort := port.PhysPort
+	err := phyPort.ActivateSerial(ontNumber, serialNumber)
+	return err
+}
 func (port *Port) provisionOntFull(ontNumber int, serialNumber string, cTag uint32, sTag uint32, nasPortID string, circuitID string) error {
 	slot := port.Parent
 

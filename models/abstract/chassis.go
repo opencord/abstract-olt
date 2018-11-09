@@ -63,6 +63,41 @@ func (chassis *Chassis) NextPort() (*Port, error) {
 
 	return nextPort, nil
 }
+func (chassis *Chassis) PreProvisonONT(slotNumber int, portNumber int, ontNumber int, cTag uint32, sTag uint32, nasPortID string, circuitID string, techProfile string, speedProfile string) error {
+	if slotNumber > len(chassis.Slots) {
+		errorMsg := fmt.Sprintf("Invalid slot Number %d ", slotNumber)
+		return errors.New(errorMsg)
+	}
+	if portNumber > 16 {
+		errorMsg := fmt.Sprintf("Invalid port Number %d ", portNumber)
+		return errors.New(errorMsg)
+	}
+	if ontNumber > 64 {
+		errorMsg := fmt.Sprintf("Invalid ont Number %d ", ontNumber)
+		return errors.New(errorMsg)
+	}
+
+	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].preProvisionOnt(ontNumber, cTag, sTag, nasPortID, circuitID, techProfile, speedProfile)
+	return err
+}
+func (chassis *Chassis) ActivateSerial(slotNumber int, portNumber int, ontNumber int, serialNumber string) error {
+	if slotNumber > len(chassis.Slots) {
+		errorMsg := fmt.Sprintf("Invalid slot Number %d ", slotNumber)
+		return errors.New(errorMsg)
+	}
+	if portNumber > 16 {
+		errorMsg := fmt.Sprintf("Invalid port Number %d ", portNumber)
+		return errors.New(errorMsg)
+	}
+	if ontNumber > 64 {
+		errorMsg := fmt.Sprintf("Invalid ont Number %d ", ontNumber)
+		return errors.New(errorMsg)
+	}
+
+	err := chassis.Slots[slotNumber-1].Ports[portNumber-1].activateSerial(ontNumber, serialNumber)
+	return err
+
+}
 func (chassis *Chassis) ActivateONTFull(slotNumber int, portNumber int, ontNumber int, serialNumber string, cTag uint32, sTag uint32, nasPortID string, circuitID string) error {
 	if slotNumber > len(chassis.Slots) {
 		errorMsg := fmt.Sprintf("Invalid slot Number %d ", slotNumber)

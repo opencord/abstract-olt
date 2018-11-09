@@ -65,6 +65,49 @@ func (e *AllReadyDeactivatedError) Error() string {
 }
 
 /*
+PreProvisionOnt - passes ont information to chassis to make call to NEM to activate (whitelist) ont
+*/
+func (port *PONPort) PreProvisionOnt(number int, sVlan uint32, cVlan uint32, nasPortID string, circuitID string, techProfile string, speedProfile string) error {
+	slot := port.Parent
+	chassis := slot.Parent
+
+	if port.Onts[number-1].Active {
+		e := AllReadyActiveError{ontNumber: number, slotNum: slot.Number, ponportNum: port.Number, clli: chassis.CLLI}
+		return &e
+	}
+	ont := &port.Onts[number-1]
+	ont.Number = number
+	ont.Svlan = sVlan
+	ont.Cvlan = cVlan
+	ont.Parent = port
+	ont.NasPortID = nasPortID
+	ont.CircuitID = circuitID
+	ont.TechProfile = techProfile
+	ont.SpeedProfile = speedProfile
+	return nil
+}
+
+/*
+ActivateSerial - passes ont information to chassis to make call to NEM to activate (whitelist) ont assumes pre provisioned ont
+*/
+func (port *PONPort) ActivateSerial(number int, serialNumber string) error {
+	slot := port.Parent
+	chassis := slot.Parent
+
+	if port.Onts[number-1].Active {
+		e := AllReadyActiveError{ontNumber: number, slotNum: slot.Number, ponportNum: port.Number, clli: chassis.CLLI}
+		return &e
+	}
+	ont := port.Onts[number-1]
+	ont.SerialNumber = serialNumber
+	fmt.Println(ont)
+	port.Parent.Parent.provisionONT(ont)
+	port.Onts[number-1].Active = true
+	return nil
+
+}
+
+/*
 ActivateOnt - passes ont information to chassis to make call to NEM to activate (whitelist) ont
 */
 func (port *PONPort) ActivateOnt(number int, sVlan uint32, cVlan uint32, serialNumber string, nasPortID string, circuitID string) error {

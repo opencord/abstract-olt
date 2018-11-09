@@ -148,6 +148,37 @@ func (s *Server) ProvisionOntFull(ctx context.Context, in *AddOntFullMessage) (*
 }
 
 /*
+PreProvisionOnt - provisions ont using sTag,cTag,NasPortID, and CircuitID passed in
+*/
+func (s *Server) PreProvisionOnt(ctx context.Context, in *PreProvisionOntMessage) (*AddOntReturn, error) {
+	clli := in.GetCLLI()
+	slotNumber := int(in.GetSlotNumber())
+	portNumber := int(in.GetPortNumber())
+	ontNumber := int(in.GetOntNumber())
+	cTag := in.GetCTag()
+	sTag := in.GetSTag()
+	nasPortID := in.GetNasPortID()
+	circuitID := in.GetCircuitID()
+	techProfile := in.GetTechProfile()
+	speedProfile := in.GetSpeedProfile()
+	success, err := impl.PreProvisionOnt(clli, slotNumber, portNumber, ontNumber, cTag, sTag, nasPortID, circuitID, techProfile, speedProfile)
+	return &AddOntReturn{Success: success}, err
+}
+
+/*
+ActivateSerial provisions an ONT on a specific Chassis/LineCard/Port
+*/
+func (s *Server) ActivateSerial(ctx context.Context, in *AddOntMessage) (*AddOntReturn, error) {
+	clli := in.GetCLLI()
+	slotNumber := int(in.GetSlotNumber())
+	portNumber := int(in.GetPortNumber())
+	ontNumber := int(in.GetOntNumber())
+	serialNumber := in.GetSerialNumber()
+	success, err := impl.ActivateSerial(clli, slotNumber, portNumber, ontNumber, serialNumber)
+	return &AddOntReturn{Success: success}, err
+}
+
+/*
 DeleteOnt - deletes a previously provision ont
 */
 func (s *Server) DeleteOnt(ctx context.Context, in *DeleteOntMessage) (*DeleteOntReturn, error) {

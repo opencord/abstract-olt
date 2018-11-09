@@ -28,4 +28,6 @@ type Ont struct {
 	Active       bool     `json:",omitempty"`
 	NasPortID    string   `json:",omitempty"`
 	CircuitID    string   `json:",omitempty"`
+	TechProfile  string   `json:",omitempty"`
+	SpeedProfile string   `json:",omitempty"`
 }

@@ -37,6 +37,8 @@ func main() {
 	addOlt := flag.Bool("s", false, "addOlt?")
 	provOnt := flag.Bool("o", false, "provisionOnt?")
 	provOntFull := flag.Bool("f", false, "provsionOntFull?")
+	preProvOnt := flag.Bool("p", false, "preProvisionOnt?")
+	activateSerial := flag.Bool("a", false, "activateSerial?")
 	deleteOnt := flag.Bool("d", false, "deleteOnt")
 	output := flag.Bool("output", false, "dump output")
 	reflow := flag.Bool("reflow", false, "reflow provisioning tosca")
@@ -75,6 +77,11 @@ func main() {
 	circuitID := flag.String("circuit_id", "", "CircuitID for ont")
 	/*END PROVISION ONT FULL EXTRA FLAGS*/
 
+	/*PREPROVISION ONT EXTRA FLAGS*/
+	techProfile := flag.String("tech_profile", "", "Tech Profile")
+	speedProfile := flag.String("speed_profile", "", "Speed Profile")
+	/*END PREPROVISION ONT EXTRA FLAGS*/
+
 	/* ECHO FLAGS */
 	message := flag.String("message", "ping", "message to be echoed back")
 	/*END ECHO FLAGS*/
@@ -97,7 +104,7 @@ func main() {
 		}
 	}
 
-	cmdFlags := []*bool{echo, addOlt, update, create, provOnt, provOntFull, deleteOnt, output, reflow, fullInventory, inventory}
+	cmdFlags := []*bool{echo, addOlt, update, create, provOnt, preProvOnt, activateSerial, provOntFull, deleteOnt, output, reflow, fullInventory, inventory}
 	cmdCount := 0
 	for _, flag := range cmdFlags {
 		if *flag {
@@ -157,10 +164,14 @@ func main() {
 		provisionONT(c, clli, slot, port, ont, serial)
 	} else if *provOntFull {
 		provisionONTFull(c, clli, slot, port, ont, serial, stag, ctag, nasPort, circuitID)
+	} else if *preProvOnt {
+		preProvisionOnt(c, clli, slot, port, ont, stag, ctag, nasPort, circuitID, techProfile, speedProfile)
+	} else if *activateSerial {
+		activateSerialNumber(c, clli, slot, port, ont, serial)
 	} else if *echo {
 		ping(c, *message)
 	} else if *output {
-		Output(c)
+		doOutput(c)
 	} else if *deleteOnt {
 		deleteONT(c, clli, slot, port, ont, serial)
 	} else if *reflow {
@@ -191,7 +202,7 @@ func (a *Authentication) GetRequestMetadata(context.Context, ...string) (map[str
 func (a *Authentication) RequireTransportSecurity() bool {
 	return true
 }
-func Output(c api.AbstractOLTClient) error {
+func doOutput(c api.AbstractOLTClient) error {
 	response, err := c.Output(context.Background(), &api.OutputMessage{Something: "wtf"})
 	if err != nil {
 		fmt.Printf("Error when calling Echo: %s", err)
@@ -282,6 +293,42 @@ func provisionONT(c api.AbstractOLTClient, clli *string, slot *uint, port *uint,
 	if err != nil {
 		debug.PrintStack()
 		fmt.Printf("Error when calling ProvsionOnt %s", err)
+		return err
+	}
+	log.Printf("Response from server: %t", res.GetSuccess())
+	return nil
+}
+func preProvisionOnt(c api.AbstractOLTClient, clli *string, slot *uint, port *uint, ont *uint, stag *uint, ctag *uint, nasPort *string, circuitID *string, techProfile *string, speedProfile *string) error {
+	fmt.Println("clli", *clli)
+	fmt.Println("slot", *slot)
+	fmt.Println("port", *port)
+	fmt.Println("ont", *ont)
+	fmt.Println("stag", *stag)
+	fmt.Println("ctag", *ctag)
+	fmt.Println("nasPort", *nasPort)
+	fmt.Println("circuitID", *circuitID)
+	fmt.Println("tech_profile", *techProfile)
+	fmt.Println("speed_profile", *speedProfile)
+	res, err := c.PreProvisionOnt(context.Background(), &api.PreProvisionOntMessage{CLLI: *clli, SlotNumber: int32(*slot), PortNumber: int32(*port),
+		OntNumber: int32(*ont), STag: uint32(*stag), CTag: uint32(*ctag), TechProfile: *techProfile, SpeedProfile: *speedProfile})
+	if err != nil {
+		debug.PrintStack()
+		fmt.Printf("Error when calling ProvsionOnt %s", err)
+		return err
+	}
+	log.Printf("Response from server: %t", res.GetSuccess())
+	return nil
+}
+func activateSerialNumber(c api.AbstractOLTClient, clli *string, slot *uint, port *uint, ont *uint, serial *string) error {
+	fmt.Println("clli", *clli)
+	fmt.Println("slot", *slot)
+	fmt.Println("port", *port)
+	fmt.Println("ont", *ont)
+	fmt.Println("serial", *serial)
+	res, err := c.ActivateSerial(context.Background(), &api.AddOntMessage{CLLI: *clli, SlotNumber: int32(*slot), PortNumber: int32(*port), OntNumber: int32(*ont), SerialNumber: *serial})
+	if err != nil {
+		debug.PrintStack()
+		fmt.Printf("Error when calling ActivateSerial %s", err)
 		return err
 	}
 	log.Printf("Response from server: %t", res.GetSuccess())
@@ -413,6 +460,28 @@ func usage() {
 	 -circuit_id CIRCUIT_ID
 	 e.g. ./client -server=localhost:7777 -f -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf -stag=33 -ctag=104 -nas_port="pon 1/1/1/3:1.1" -circuit_id="CLLI 1/1/1/13:1.1"
 
+   -p pre-provision ont - same as -o above but allows explicit set of s/c vlans , NasPortID and CircuitID and NO serial number
+      params:
+	 -clli CLLI_NAME
+	 -slot SLOT_NUMBER [1-16]
+	 -port OLT_PORT_NUMBER [1-16]
+	 -ont ONT_NUMBER [1-64]
+	 -stag S_TAG
+	 -ctag C_TAG
+	 -nas_port NAS_PORT_ID
+	 -circuit_id CIRCUIT_ID
+	 -tech_profile TECH_PROFILE
+	 -speed_profile SPEED_PROFILE
+	 e.g. ./client -server=localhost:7777 -p -clli=MY_CLLI -slot=1 -port=1 -ont=22  -stag=33 -ctag=104 -nas_port="pon 1/1/1/3:1.1" -circuit_id="CLLI 1/1/1/13:1.1 -tech_profile=Business -speed_profile=1GB
+   -a activate serial  - adds ont to whitelist in XOS  on a specific port on a specific olt chassis based on abstract -> phyisical mapping - must be preProvisioned
+      params:
+	 -clli CLLI_NAME
+	 -slot SLOT_NUMBER [1-16]
+	 -port OLT_PORT_NUMBER [1-16]
+	 -ont ONT_NUMBER [1-64]
+	 -serial ONT_SERIAL_NUM
+	 e.g. ./client -server=localhost:7777 -a -clli=MY_CLLI -slot=1 -port=1 -ont=22 -serial=aer900jasdf
+
    -d delete ont - removes ont from service
       params:
 	 -clli CLLI_NAME
@@ -435,7 +504,7 @@ func usage() {
 
     -full_inventory - returns a json document that describes all currently provisioned pods
          e.g. ./client -full_inventory
-        
+
 	 `
 
 	fmt.Println(output)

@@ -24,7 +24,7 @@ import (
 )
 
 /*
-ProvsionOnt - provisions ont using sTag,cTag,NasPortID, and CircuitID generated internally
+ProvisionOnt - provisions ont using sTag,cTag,NasPortID, and CircuitID generated internally
 */
 func ProvisionOnt(clli string, slotNumber int, portNumber int, ontNumber int, serialNumber string) (bool, error) {
 	myChan := getSyncChannel()
@@ -42,7 +42,43 @@ func ProvisionOnt(clli string, slotNumber int, portNumber int, ontNumber int, se
 }
 
 /*
-ProvsionOntFull - provisions ont using sTag,cTag,NasPortID, and CircuitID passed in
+ActivateSerial - provisions ont using sTag,cTag,NasPortID, and CircuitID generated internally
+*/
+func ActivateSerial(clli string, slotNumber int, portNumber int, ontNumber int, serialNumber string) (bool, error) {
+	myChan := getSyncChannel()
+	<-myChan
+	defer done(myChan, true)
+	chassisMap := models.GetChassisMap()
+	chassisHolder := (*chassisMap)[clli]
+	if chassisHolder == nil {
+		errString := fmt.Sprintf("There is no chassis with CLLI of %s", clli)
+		return false, errors.New(errString)
+	}
+	err := chassisHolder.AbstractChassis.ActivateSerial(slotNumber, portNumber, ontNumber, serialNumber)
+	isDirty = true
+	return true, err
+}
+
+/*
+PreProvisionOnt - provisions ont using sTag,cTag,NasPortID, and CircuitID passed in
+*/
+func PreProvisionOnt(clli string, slotNumber int, portNumber int, ontNumber int, cTag uint32, sTag uint32, nasPortID string, circuitID string, techProfile string, speedProfile string) (bool, error) {
+	myChan := getSyncChannel()
+	<-myChan
+	defer done(myChan, true)
+	chassisMap := models.GetChassisMap()
+	chassisHolder := (*chassisMap)[clli]
+	if chassisHolder == nil {
+		errString := fmt.Sprintf("There is no chassis with CLLI of %s", clli)
+		return false, errors.New(errString)
+	}
+	err := chassisHolder.AbstractChassis.PreProvisonONT(slotNumber, portNumber, ontNumber, cTag, sTag, nasPortID, circuitID, techProfile, speedProfile)
+	isDirty = true
+	return true, err
+}
+
+/*
+ProvisionOntFull - provisions ont using sTag,cTag,NasPortID, and CircuitID passed in
 */
 func ProvisionOntFull(clli string, slotNumber int, portNumber int, ontNumber int, serialNumber string, cTag uint32, sTag uint32, nasPortID string, circuitID string) (bool, error) {
 	myChan := getSyncChannel()
