@@ -19,6 +19,7 @@ package settings
 var debug = false
 var dummy = false
 var mongo = false
+var grpc = true
 var mongodb = ""
 
 /*
@@ -48,15 +49,44 @@ GetDummy - returns the current value of dummy
 func GetDummy() bool {
 	return dummy
 }
+
+/*
+SetMongo - sets useMongo mode
+*/
 func SetMongo(useMongo bool) {
 	mongo = useMongo
 }
+
+/*GetMongo - returns the value of mongo
+ */
 func GetMongo() bool {
 	return mongo
 }
+
+/*
+SetMongodb - sets the connection string for mongo db used for backups
+*/
 func SetMongodb(connectString string) {
 	mongodb = connectString
 }
+
+/*
+GetMongodb - returns the connection string used for connecting to mongo db
+*/
 func GetMongodb() string {
 	return mongodb
+}
+
+/*
+SetGrpc - sets useGrpc mode
+*/
+func SetGrpc(useGrpc bool) {
+	grpc = useGrpc
+}
+
+/*
+GetGrpc - returns the value of grpc
+*/
+func GetGrpc() bool {
+	return grpc
 }

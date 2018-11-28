@@ -24,7 +24,7 @@ import (
 	"gerrit.opencord.org/abstract-olt/models"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/options"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
 	context "golang.org/x/net/context"
 )
 
@@ -38,7 +38,11 @@ func DoOutput() (bool, error) {
 		defer done(myChan, true)
 		chassisMap := models.GetChassisMap()
 		if settings.GetMongo() {
-			client, err := mongo.NewClient(settings.GetMongodb())
+			clientOptions := options.Client()
+			creds := options.Credential{AuthMechanism: "SCRAM-SHA-256", AuthSource: "AbstractOLT", Username: "seba", Password: "seba"}
+			clientOptions.SetAuth(creds)
+
+			client, err := mongo.NewClientWithOptions(settings.GetMongodb(), clientOptions)
 			client.Connect(context.Background())
 			if err != nil {
 				log.Printf("client connect to mongo db @%s failed with %v\n", settings.GetMongodb(), err)
@@ -46,15 +50,21 @@ func DoOutput() (bool, error) {
 			defer client.Disconnect(context.Background())
 			for clli, chassisHolder := range *chassisMap {
 				json, _ := (chassisHolder).Serialize()
-				collection := client.Database("AbstractOLT").Collection("backup")
-				doc := bson.NewDocument(bson.EC.String("_id", clli))
-				filter := bson.NewDocument(bson.EC.String("_id", clli))
-				doc.Append(bson.EC.Binary("body", json))
-
-				updateDoc := bson.NewDocument(bson.EC.SubDocument("$set", doc))
+				collection := client.Database("AbstractOLT").Collection("backups")
 				//update or insert if not existent
 				upsert := true
-				res, err := collection.UpdateOne(context.Background(), filter, updateDoc, &options.UpdateOptions{Upsert: &upsert})
+				res, err := collection.UpdateOne(context.Background(),
+					bson.D{
+						{"_id", clli},
+					},
+					bson.D{
+						{
+							"$set", bson.D{
+								{"body", json},
+							},
+						},
+					}, &options.UpdateOptions{Upsert: &upsert})
+
 				if err != nil {
 					log.Printf("collection.UpdateOne failed with %v\n", err)
 				} else {

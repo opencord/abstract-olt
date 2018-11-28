@@ -32,8 +32,9 @@ import (
 	"gerrit.opencord.org/abstract-olt/internal/pkg/settings"
 	"gerrit.opencord.org/abstract-olt/models"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -189,6 +190,7 @@ func main() {
 	h := flag.Bool("h", false, "Show usage")
 	help := flag.Bool("help", false, "Show usage")
 	dummy := flag.Bool("dummy", false, "Run in dummy mode where YAML is not sent to XOS")
+	grpc := flag.Bool("grpc", false, "Use XOS GRPC interface instead of TOSCA")
 
 	useMongo := flag.Bool("useMongo", false, "use mongo db for backup/restore")
 	mongodb := flag.String("mongodb", "mongodb://foundry:foundry@localhost:27017", "connect string for mongodb backup/restore")
@@ -205,6 +207,7 @@ Params:
       -log_file [default $WORKING_DIR/AbstractOLT.log] LOG_FILE
       -mongo [default false] use mongodb for backup restore
       -mongodb [default mongodb://foundry:foundry@localhost:27017] connect string for mongodb - Required if mongo == true
+      -grpc [default false] tell AbstractOLT to use XOS GRPC interface instead of TOSCA
       -h(elp) print this usage
 
 `
@@ -214,8 +217,9 @@ Params:
 	settings.SetDebug(*debugPtr)
 	settings.SetMongo(*useMongo)
 	settings.SetMongodb(*mongodb)
+	settings.SetGrpc(*grpc)
 	fmt.Println("Startup Params: debug:", *debugPtr, " Authentication:", *useAuthentication, " SSL:", *useSsl, "Cert Directory", *certDirectory,
-		"ListenAddress:", *listenAddress, " grpc port:", *grpcPort, " rest port:", *restPort, "Logging to ", *logFile)
+		"ListenAddress:", *listenAddress, " grpc port:", *grpcPort, " rest port:", *restPort, "Logging to ", *logFile, "Use XOS GRPC ", *grpc)
 
 	file, err := os.OpenFile(*logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -257,35 +261,41 @@ Params:
 
 	// infinite loop
 	if *useMongo {
-		client, err := mongo.NewClient(*mongodb)
+		clientOptions := options.Client()
+		creds := options.Credential{AuthMechanism: "SCRAM-SHA-256", AuthSource: "AbstractOLT", Username: "seba", Password: "seba"}
+		clientOptions.SetAuth(creds)
+
+		client, err := mongo.NewClientWithOptions(*mongodb, clientOptions)
+
 		client.Connect(context.Background())
+		fmt.Println(client)
 		defer client.Disconnect(context.Background())
 		if err != nil {
 			log.Fatalf("unable to connect to mongodb with %v\n", err)
 		}
-		collection := client.Database("AbstractOLT").Collection("backup")
+		collection := client.Database("AbstractOLT").Collection("backups")
 		cur, err := collection.Find(context.Background(), nil)
 		if err != nil {
 			log.Fatalf("Unable to connect to collection with %v\n", err)
 		}
 		defer cur.Close(context.Background())
 		for cur.Next(context.Background()) {
-			elem := bson.NewDocument()
-			err := cur.Decode(elem)
+			doc := bsonx.Doc{}
+			err := cur.Decode(&doc)
 			if err != nil {
 				log.Fatal(err)
 			}
-			clli := elem.LookupElement("_id").Value()
-			body := elem.LookupElement("body").Value()
-			_, bodyBin := (*body).Binary()
+			clli := doc.LookupElement("_id").Value
+			body := doc.LookupElement("body").Value
+			_, bodyBin := (body).Binary()
 
 			chassisHolder := models.ChassisHolder{}
 			err = chassisHolder.Deserialize(bodyBin)
 			if err != nil {
-				log.Printf("Deserialize threw an error for clli %s %v\n", (*clli).StringValue(), err)
+				log.Printf("Deserialize threw an error for clli %s %v\n", (clli).StringValue(), err)
 			} else {
 				chassisMap := models.GetChassisMap()
-				(*chassisMap)[(*clli).StringValue()] = &chassisHolder
+				(*chassisMap)[(clli).StringValue()] = &chassisHolder
 
 			}
 		}
