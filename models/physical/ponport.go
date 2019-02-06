@@ -68,6 +68,7 @@ func (e *AllReadyDeactivatedError) Error() string {
 PreProvisionOnt - passes ont information to chassis to make call to NEM to activate (whitelist) ont
 */
 func (port *PONPort) PreProvisionOnt(number int, sVlan uint32, cVlan uint32, nasPortID string, circuitID string, techProfile string, speedProfile string) error {
+	fmt.Printf("PrPreProvisionOnt(number %d, sVlan %d, cVlan %d, nasPortID %s, circuitID %s, techProfile %s, speedProfile %s\n", number, sVlan, cVlan, nasPortID, circuitID, techProfile, speedProfile)
 	slot := port.Parent
 	chassis := slot.Parent
 
@@ -84,6 +85,7 @@ func (port *PONPort) PreProvisionOnt(number int, sVlan uint32, cVlan uint32, nas
 	ont.CircuitID = circuitID
 	ont.TechProfile = techProfile
 	ont.SpeedProfile = speedProfile
+	fmt.Printf("ponPort PreProvision ont :%v\n", ont)
 	return nil
 }
 
@@ -98,10 +100,10 @@ func (port *PONPort) ActivateSerial(number int, serialNumber string) error {
 		e := AllReadyActiveError{ontNumber: number, slotNum: slot.Number, ponportNum: port.Number, clli: chassis.CLLI}
 		return &e
 	}
-	ont := port.Onts[number-1]
+	ont := &port.Onts[number-1]
 	ont.SerialNumber = serialNumber
 	fmt.Println(ont)
-	port.Parent.Parent.provisionONT(ont)
+	port.Parent.Parent.provisionONT(*ont)
 	port.Onts[number-1].Active = true
 	return nil
 
@@ -130,6 +132,8 @@ func (port *PONPort) ActivateOnt(number int, sVlan uint32, cVlan uint32, serialN
 DeleteOnt - passes ont information to chassis to make call to NEM to de-activate (de-whitelist) ont
 */
 func (port *PONPort) DeleteOnt(number int, sVlan uint32, cVlan uint32, serialNumber string) error {
+
+	fmt.Printf("DeleteOnt(number %d, sVlan %d, cVlan %d, serialNumber %s)\n", number, sVlan, cVlan, serialNumber)
 	slot := port.Parent
 	chassis := slot.Parent
 	if port.Onts[number-1].Active != true {

@@ -217,6 +217,14 @@ Params:
 	settings.SetDebug(*debugPtr)
 	settings.SetMongo(*useMongo)
 	settings.SetMongodb(*mongodb)
+	if len(*mongodb) > 1 {
+		userPassHost := strings.Split(*mongodb, "://")[1]
+		passwdHost := strings.Split(userPassHost, ":")
+		user := strings.Split(userPassHost, ":")[0]
+		password := strings.Split(passwdHost[1], "@")[0]
+		settings.SetMongoUser(user)
+		settings.SetMongoPassword(password)
+	}
 	settings.SetGrpc(*grpc)
 	fmt.Println("Startup Params: debug:", *debugPtr, " Authentication:", *useAuthentication, " SSL:", *useSsl, "Cert Directory", *certDirectory,
 		"ListenAddress:", *listenAddress, " grpc port:", *grpcPort, " rest port:", *restPort, "Logging to ", *logFile, "Use XOS GRPC ", *grpc)
@@ -262,7 +270,7 @@ Params:
 	// infinite loop
 	if *useMongo {
 		clientOptions := options.Client()
-		creds := options.Credential{AuthMechanism: "SCRAM-SHA-256", AuthSource: "AbstractOLT", Username: "seba", Password: "seba"}
+		creds := options.Credential{AuthMechanism: "SCRAM-SHA-256", AuthSource: "AbstractOLT", Username: settings.GetMongoUser(), Password: settings.GetMongoPassword()}
 		clientOptions.SetAuth(creds)
 
 		client, err := mongo.NewClientWithOptions(*mongodb, clientOptions)

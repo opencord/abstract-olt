@@ -270,7 +270,7 @@ func addOltChassis(c api.AbstractOLTClient, clli *string, oltAddress *string, ol
 	}
 	switch *driver {
 	case "openolt":
-		driverType = api.AddOLTChassisMessage_openoltDriver
+		driverType = api.AddOLTChassisMessage_openolt
 
 	}
 
@@ -310,7 +310,7 @@ func preProvisionOnt(c api.AbstractOLTClient, clli *string, slot *uint, port *ui
 	fmt.Println("tech_profile", *techProfile)
 	fmt.Println("speed_profile", *speedProfile)
 	res, err := c.PreProvisionOnt(context.Background(), &api.PreProvisionOntMessage{CLLI: *clli, SlotNumber: int32(*slot), PortNumber: int32(*port),
-		OntNumber: int32(*ont), STag: uint32(*stag), CTag: uint32(*ctag), TechProfile: *techProfile, SpeedProfile: *speedProfile})
+		OntNumber: int32(*ont), STag: uint32(*stag), CTag: uint32(*ctag), NasPortID: *nasPort, CircuitID: *circuitID, TechProfile: *techProfile, SpeedProfile: *speedProfile})
 	if err != nil {
 		debug.PrintStack()
 		fmt.Printf("Error when calling ProvsionOnt %s", err)

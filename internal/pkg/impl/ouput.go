@@ -39,7 +39,7 @@ func DoOutput() (bool, error) {
 		chassisMap := models.GetChassisMap()
 		if settings.GetMongo() {
 			clientOptions := options.Client()
-			creds := options.Credential{AuthMechanism: "SCRAM-SHA-256", AuthSource: "AbstractOLT", Username: "seba", Password: "seba"}
+			creds := options.Credential{AuthMechanism: "SCRAM-SHA-256", AuthSource: "AbstractOLT", Username: settings.GetMongoUser(), Password: settings.GetMongoPassword()}
 			clientOptions.SetAuth(creds)
 
 			client, err := mongo.NewClientWithOptions(settings.GetMongodb(), clientOptions)

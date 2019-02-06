@@ -59,6 +59,9 @@ func testLogin(xosUser string, xosPassword string, xosIP net.IP, xosPort int) bo
 	if settings.GetDummy() {
 		return true
 	}
+	if settings.GetGrpc() {
+		return true
+	}
 	var dummyYaml = `
 tosca_definitions_version: tosca_simple_yaml_1_0
 imports:

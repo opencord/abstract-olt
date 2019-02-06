@@ -52,15 +52,15 @@ message AddOLTChassisMessage{
    fixed32 NumPorts = 5;
    bool Activate = 6;
    enum OltDriver {
-      openoltDriver= 0;
-      asfvolt16Driver=1;
-      adtranDriver=2;
-      tibitsDriver=3;
+      openolt= 0;
+      asfvolt16=1;
+      adtran=2;
+      tibits=3;
    }
    OltDriver Driver=7;
    enum OltType{
       edgecore=0;
-      adtran=1;
+      adtranOlt=1;
       tibit=2;
    }
    OltType Type=8;

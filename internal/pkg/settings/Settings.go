@@ -21,6 +21,8 @@ var dummy = false
 var mongo = false
 var grpc = true
 var mongodb = ""
+var mongoUser = ""
+var mongoPasswd = ""
 
 /*
 SetDebug - sets debug setting
@@ -75,6 +77,34 @@ GetMongodb - returns the connection string used for connecting to mongo db
 */
 func GetMongodb() string {
 	return mongodb
+}
+
+/*
+SetMongoUser - sets the connection string for mongo db used for backups
+*/
+func SetMongoUser(user string) {
+	mongoUser = user
+}
+
+/*
+GetMongoUser - returns the connection string used for connecting to mongo db
+*/
+func GetMongoUser() string {
+	return mongoUser
+}
+
+/*
+SetMongoPassword - sets the connection string for mongo db used for backups
+*/
+func SetMongoPassword(password string) {
+	mongoPasswd = password
+}
+
+/*
+GetMongoPassword - returns the connection string used for connecting to mongo db
+*/
+func GetMongoPassword() string {
+	return mongoPasswd
 }
 
 /*

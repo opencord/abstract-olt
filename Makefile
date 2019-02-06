@@ -24,6 +24,12 @@ SERVER_PKG_BUILD := "${PKG}/cmd/AbstractOLT"
 CLIENT_PKG_BUILD := "${PKG}/client"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 DOCKERTAG ?= "latest"
+SEBA_PROTO_PATH := contrib/xos
+SEBA_SCHEMA_PATH := contrib/schema
+SEBA_PROTO_FILES := $(wildcard contrib/xos/*.proto)
+SEBA_PROTO_GO_FILES := $(foreach f,$(SEBA_PROTO_FILES),$(subst .proto,.pb.go,$(f)))
+SEBA_PROTO_DESC_FILES := $(foreach f,$(SEBA_PROTO_FILES),$(subst .proto,.desc,$(f)))
+
 
 .PHONY: all api server client test docker
 
@@ -43,14 +49,26 @@ api/abstract_olt_api.pb.gw.go :
 	--grpc-gateway_out=logtostderr=true:api \
 	 api/abstract_olt_api.proto
 
-api/xos.pb.go:
-	@protoc -I seba-api/ \
-	   -I${GOPATH}/src \
-	  -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-	  -I${GOPATH}/src/github.com/googleapis/google/api \
-	  -I${GOPATH}/src/github.com/googleapis/ \
-	  --go_out=plugins=grpc:seba-api \
-	  seba-api/xos.proto
+seba-api:  schema/schema.pb.go $(SEBA_PROTO_GO_FILES)
+
+%.pb.go: %.proto
+	@protoc -I ${SEBA_PROTO_PATH} \
+                -I ${SEBA_SCHEMA_PATH} \
+                --go_out=plugins=grpc:${SEBA_PROTO_PATH} \
+                 -I${GOPATH}/src \
+                 -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+                 $<
+
+schema/schema.pb.go:
+	@protoc -I ${SEBA_PROTO_PATH} \
+                -I ${SEBA_SCHEMA_PATH} \
+                --go_out=plugins=grpc:${SEBA_SCHEMA_PATH} \
+                -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+                 --descriptor_set_out=${SEBA_SCHEMA_PATH}/schema.desc \
+                 --include_imports \
+                 --include_source_info \
+                 ${SEBA_SCHEMA_PATH}/schema.proto
+
 
 
 swagger:
@@ -65,15 +83,17 @@ api: api/abstract_olt_api.pb.go api/abstract_olt_api.pb.gw.go swagger
 dep: ## Get the dependencies
 	@go get -v -d ./...
 
-server: dep api ## Build the binary file for server
+server: api seba-api dep ## Build the binary file for server
 	@go build -i -v -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
 
-client: dep api ## Build the binary file for client
+client:  api dep## Build the binary file for client
 	@go build -i -v -o $(CLIENT_OUT) $(CLIENT_PKG_BUILD)
 
 clean: ## Remove previous builds
 	@rm $(SERVER_OUT) $(CLIENT_OUT) $(API_OUT) $(API_REST_OUT) $(SWAGGER_OUT)
-	@rm -rf seba-api
+	@rm contrib/xos/*.go
+	@rm contrib/schema/*.go
+
 
 test: all
 	@go test ./...

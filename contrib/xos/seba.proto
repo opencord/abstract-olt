@@ -1,0 +1,2531 @@
+syntax = "proto3";
+
+package xos;
+
+import "google/protobuf/empty.proto";
+import "annotations.proto";
+import "common.proto";
+import "xosoptions.proto";
+
+// Note: all fields are wrapped in a "oneof". This causes proto3 to always send
+// fields that are set by the caller, regardless if they are set to a default
+// value. XOS uses this to know when to apply a default value.
+
+
+message AttWorkflowDriverService {
+    option (contentTypeId) = "att-workflow-driver.attworkflowdriverservice";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof description_present {
+      string description = 101 [(val).maxLength = 254];
+    }
+    oneof enabled_present {
+      bool enabled = 102 [(val).nonNull = true];
+    }
+    oneof kind_present {
+      string kind = 103 [(val).maxLength = 30, (val).nonNull = true];
+    }
+    oneof name_present {
+      string name = 104 [(val).maxLength = 30, (val).nonNull = true];
+    }
+    oneof versionNumber_present {
+      string versionNumber = 105 [(val).maxLength = 30];
+    }
+    oneof published_present {
+      bool published = 106 [(val).nonNull = true];
+    }
+    oneof icon_url_present {
+      string icon_url = 108 [(val).maxLength = 1024];
+    }
+    oneof public_key_present {
+      string public_key = 109 [(val).maxLength = 4096];
+    }
+    oneof private_key_fn_present {
+      string private_key_fn = 110 [(val).maxLength = 4096];
+    }
+    oneof service_specific_id_present {
+      string service_specific_id = 111 [(val).maxLength = 30];
+    }
+    oneof service_specific_attribute_present {
+      string service_specific_attribute = 112 ;
+    }
+    repeated int32 addresspools_ids  = 1001 [(reverseForeignKey).modelName = "AddressPool"];
+    repeated int32 serviceports_ids  = 1002 [(reverseForeignKey).modelName = "ServicePort"];
+    repeated int32 serviceattributes_ids  = 1003 [(reverseForeignKey).modelName = "ServiceAttribute"];
+    repeated int32 provided_dependencies_ids  = 1004 [(reverseForeignKey).modelName = "ServiceDependency"];
+    repeated int32 subscribed_dependencies_ids  = 1005 [(reverseForeignKey).modelName = "ServiceDependency"];
+    repeated int32 slices_ids  = 1006 [(reverseForeignKey).modelName = "Slice"];
+    repeated int32 tags_ids  = 1007 [(reverseForeignKey).modelName = "Tag"];
+    repeated int32 service_interfaces_ids  = 1008 [(reverseForeignKey).modelName = "ServiceInterface"];
+    repeated int32 service_instances_ids  = 1009 [(reverseForeignKey).modelName = "ServiceInstance"];
+    repeated int32 subscribed_links_ids  = 1010 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 owned_trust_domains_ids  = 1011 [(reverseForeignKey).modelName = "TrustDomain"];
+    repeated int32 whitelist_entries_ids  = 1101 [(reverseForeignKey).modelName = "AttWorkflowDriverWhiteListEntry"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message AttWorkflowDriverServices {
+    repeated AttWorkflowDriverService items = 1;
+}
+
+message AttWorkflowDriverServiceInstance {
+    option (contentTypeId) = "att-workflow-driver.attworkflowdriverserviceinstance";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof name_present {
+      string name = 101 [(val).maxLength = 200];
+    }
+    oneof owner_present {
+      int32 owner_id = 102 [(val).nonNull = true, (foreignKey).modelName = "Service", (foreignKey).reverseFieldName = "service_instances"];
+    }
+    oneof service_specific_id_present {
+      string service_specific_id = 103 [(val).maxLength = 30];
+    }
+    oneof service_specific_attribute_present {
+      string service_specific_attribute = 110 ;
+    }
+    oneof link_deleted_count_present {
+      uint32 link_deleted_count = 111 ;
+    }
+    oneof master_serviceinstance_present {
+      int32 master_serviceinstance_id = 112 [(foreignKey).modelName = "ServiceInstance", (foreignKey).reverseFieldName = "child_serviceinstances"];
+    }
+    oneof serial_number_present {
+      string serial_number = 202 [(val).maxLength = 254];
+    }
+    oneof authentication_state_present {
+      string authentication_state = 203 [(val).maxLength = 50];
+    }
+    oneof of_dpid_present {
+      string of_dpid = 204 [(val).maxLength = 254];
+    }
+    oneof uni_port_id_present {
+      int32 uni_port_id = 205 ;
+    }
+    oneof onu_state_present {
+      string onu_state = 206 [(val).maxLength = 254];
+    }
+    oneof status_message_present {
+      string status_message = 207 [(val).maxLength = 254];
+    }
+    oneof dhcp_state_present {
+      string dhcp_state = 208 [(val).maxLength = 254];
+    }
+    oneof ip_address_present {
+      string ip_address = 209 [(val).maxLength = 20];
+    }
+    oneof mac_address_present {
+      string mac_address = 210 [(val).maxLength = 20];
+    }
+    repeated int32 ports_ids  = 1001 [(reverseForeignKey).modelName = "Port"];
+    repeated int32 child_serviceinstances_ids  = 1002 [(reverseForeignKey).modelName = "ServiceInstance"];
+    repeated int32 provided_links_ids  = 1003 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 subscribed_links_ids  = 1005 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 service_instance_attributes_ids  = 1006 [(reverseForeignKey).modelName = "ServiceInstanceAttribute"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message AttWorkflowDriverServiceInstances {
+    repeated AttWorkflowDriverServiceInstance items = 1;
+}
+
+message AttWorkflowDriverWhiteListEntry {
+    option (contentTypeId) = "att-workflow-driver.attworkflowdriverwhitelistentry";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof owner_present {
+      int32 owner_id = 101 [(foreignKey).modelName = "AttWorkflowDriverService", (foreignKey).reverseFieldName = "whitelist_entries"];
+    }
+    oneof serial_number_present {
+      string serial_number = 102 [(val).maxLength = 254];
+    }
+    oneof pon_port_id_present {
+      int32 pon_port_id = 103 ;
+    }
+    oneof device_id_present {
+      string device_id = 104 [(val).maxLength = 54];
+    }
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message attworkflowdriverwhitelistentries {
+    repeated AttWorkflowDriverWhiteListEntry items = 1;
+}
+
+message BNGPortMapping {
+    option (contentTypeId) = "fabric-crossconnect.bngportmapping";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof s_tag_present {
+      string s_tag = 101 [(val).nonNull = true];
+    }
+    oneof switch_port_present {
+      int32 switch_port = 102 [(val).nonNull = true];
+    }
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message BNGPortMappings {
+    repeated BNGPortMapping items = 1;
+}
+
+message FabricCrossconnectService {
+    option (contentTypeId) = "fabric-crossconnect.fabriccrossconnectservice";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof description_present {
+      string description = 101 [(val).maxLength = 254];
+    }
+    oneof enabled_present {
+      bool enabled = 102 [(val).nonNull = true];
+    }
+    oneof kind_present {
+      string kind = 103 [(val).maxLength = 30, (val).nonNull = true];
+    }
+    oneof name_present {
+      string name = 104 [(val).maxLength = 30, (val).nonNull = true];
+    }
+    oneof versionNumber_present {
+      string versionNumber = 105 [(val).maxLength = 30];
+    }
+    oneof published_present {
+      bool published = 106 [(val).nonNull = true];
+    }
+    oneof icon_url_present {
+      string icon_url = 108 [(val).maxLength = 1024];
+    }
+    oneof public_key_present {
+      string public_key = 109 [(val).maxLength = 4096];
+    }
+    oneof private_key_fn_present {
+      string private_key_fn = 110 [(val).maxLength = 4096];
+    }
+    oneof service_specific_id_present {
+      string service_specific_id = 111 [(val).maxLength = 30];
+    }
+    oneof service_specific_attribute_present {
+      string service_specific_attribute = 112 ;
+    }
+    repeated int32 addresspools_ids  = 1001 [(reverseForeignKey).modelName = "AddressPool"];
+    repeated int32 serviceports_ids  = 1002 [(reverseForeignKey).modelName = "ServicePort"];
+    repeated int32 serviceattributes_ids  = 1003 [(reverseForeignKey).modelName = "ServiceAttribute"];
+    repeated int32 provided_dependencies_ids  = 1004 [(reverseForeignKey).modelName = "ServiceDependency"];
+    repeated int32 subscribed_dependencies_ids  = 1005 [(reverseForeignKey).modelName = "ServiceDependency"];
+    repeated int32 slices_ids  = 1006 [(reverseForeignKey).modelName = "Slice"];
+    repeated int32 tags_ids  = 1007 [(reverseForeignKey).modelName = "Tag"];
+    repeated int32 service_interfaces_ids  = 1008 [(reverseForeignKey).modelName = "ServiceInterface"];
+    repeated int32 service_instances_ids  = 1009 [(reverseForeignKey).modelName = "ServiceInstance"];
+    repeated int32 subscribed_links_ids  = 1010 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 owned_trust_domains_ids  = 1011 [(reverseForeignKey).modelName = "TrustDomain"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message FabricCrossconnectServices {
+    repeated FabricCrossconnectService items = 1;
+}
+
+message FabricCrossconnectServiceInstance {
+    option (contentTypeId) = "fabric-crossconnect.fabriccrossconnectserviceinstance";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof name_present {
+      string name = 101 [(val).maxLength = 200];
+    }
+    oneof owner_present {
+      int32 owner_id = 102 [(val).nonNull = true, (foreignKey).modelName = "Service", (foreignKey).reverseFieldName = "service_instances"];
+    }
+    oneof service_specific_id_present {
+      string service_specific_id = 103 [(val).maxLength = 30];
+    }
+    oneof service_specific_attribute_present {
+      string service_specific_attribute = 110 ;
+    }
+    oneof link_deleted_count_present {
+      uint32 link_deleted_count = 111 ;
+    }
+    oneof master_serviceinstance_present {
+      int32 master_serviceinstance_id = 112 [(foreignKey).modelName = "ServiceInstance", (foreignKey).reverseFieldName = "child_serviceinstances"];
+    }
+    oneof s_tag_present {
+      int32 s_tag = 201 ;
+    }
+    oneof switch_datapath_id_present {
+      string switch_datapath_id = 202 ;
+    }
+    oneof source_port_present {
+      int32 source_port = 203 ;
+    }
+    repeated int32 ports_ids  = 1001 [(reverseForeignKey).modelName = "Port"];
+    repeated int32 child_serviceinstances_ids  = 1002 [(reverseForeignKey).modelName = "ServiceInstance"];
+    repeated int32 provided_links_ids  = 1003 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 subscribed_links_ids  = 1005 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 service_instance_attributes_ids  = 1006 [(reverseForeignKey).modelName = "ServiceInstanceAttribute"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message FabricCrossconnectServiceInstances {
+    repeated FabricCrossconnectServiceInstance items = 1;
+}
+
+message NNIPort {
+    option (contentTypeId) = "volt.nniport";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof name_present {
+      string name = 101 ;
+    }
+    oneof port_no_present {
+      int32 port_no = 103 ;
+    }
+    oneof admin_state_present {
+      string admin_state = 104 ;
+    }
+    oneof oper_status_present {
+      string oper_status = 105 ;
+    }
+    oneof olt_device_present {
+      int32 olt_device_id = 201 [(foreignKey).modelName = "OLTDevice", (foreignKey).reverseFieldName = "nni_ports"];
+    }
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message NNIPorts {
+    repeated NNIPort items = 1;
+}
+
+message OLTDevice {
+    option (contentTypeId) = "volt.oltdevice";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof volt_service_present {
+      int32 volt_service_id = 101 [(foreignKey).modelName = "VOLTService", (foreignKey).reverseFieldName = "volt_devices"];
+    }
+    oneof name_present {
+      string name = 102 [(val).maxLength = 254];
+    }
+    oneof device_type_present {
+      string device_type = 103 [(val).maxLength = 254];
+    }
+    oneof host_present {
+      string host = 104 [(val).maxLength = 254];
+    }
+    oneof port_present {
+      int32 port = 105 ;
+    }
+    oneof mac_address_present {
+      string mac_address = 106 ;
+    }
+    oneof serial_number_present {
+      string serial_number = 109 ;
+    }
+    oneof device_id_present {
+      string device_id = 110 ;
+    }
+    oneof admin_state_present {
+      string admin_state = 111 ;
+    }
+    oneof oper_status_present {
+      string oper_status = 112 ;
+    }
+    oneof of_id_present {
+      string of_id = 113 ;
+    }
+    oneof dp_id_present {
+      string dp_id = 114 ;
+    }
+    oneof uplink_present {
+      string uplink = 115 ;
+    }
+    oneof driver_present {
+      string driver = 116 ;
+    }
+    oneof switch_datapath_id_present {
+      string switch_datapath_id = 117 ;
+    }
+    oneof switch_port_present {
+      string switch_port = 118 ;
+    }
+    oneof outer_tpid_present {
+      string outer_tpid = 119 ;
+    }
+    oneof nas_id_present {
+      string nas_id = 120 ;
+    }
+    repeated int32 pon_ports_ids  = 1001 [(reverseForeignKey).modelName = "PONPort"];
+    repeated int32 nni_ports_ids  = 1002 [(reverseForeignKey).modelName = "NNIPort"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message OLTDevices {
+    repeated OLTDevice items = 1;
+}
+
+message ONUDevice {
+    option (contentTypeId) = "volt.onudevice";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof pon_port_present {
+      int32 pon_port_id = 101 [(foreignKey).modelName = "PONPort", (foreignKey).reverseFieldName = "onu_devices"];
+    }
+    oneof serial_number_present {
+      string serial_number = 102 [(val).maxLength = 254];
+    }
+    oneof vendor_present {
+      string vendor = 103 [(val).maxLength = 254];
+    }
+    oneof device_type_present {
+      string device_type = 104 [(val).maxLength = 254];
+    }
+    oneof device_id_present {
+      string device_id = 105 [(val).maxLength = 254];
+    }
+    oneof admin_state_present {
+      string admin_state = 106 ;
+    }
+    oneof oper_status_present {
+      string oper_status = 107 ;
+    }
+    oneof connect_status_present {
+      string connect_status = 108 ;
+    }
+    repeated int32 pononu_ports_ids  = 1001 [(reverseForeignKey).modelName = "PONONUPort"];
+    repeated int32 uni_ports_ids  = 1002 [(reverseForeignKey).modelName = "UNIPort"];
+    repeated int32 volt_service_instances_ids  = 1003 [(reverseForeignKey).modelName = "VOLTServiceInstance"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message ONUDevices {
+    repeated ONUDevice items = 1;
+}
+
+message PONONUPort {
+    option (contentTypeId) = "volt.pononuport";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof name_present {
+      string name = 101 ;
+    }
+    oneof port_no_present {
+      int32 port_no = 103 ;
+    }
+    oneof admin_state_present {
+      string admin_state = 104 ;
+    }
+    oneof oper_status_present {
+      string oper_status = 105 ;
+    }
+    oneof onu_device_present {
+      int32 onu_device_id = 201 [(foreignKey).modelName = "ONUDevice", (foreignKey).reverseFieldName = "pononu_ports"];
+    }
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message PONONUPorts {
+    repeated PONONUPort items = 1;
+}
+
+message PONPort {
+    option (contentTypeId) = "volt.ponport";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof name_present {
+      string name = 101 ;
+    }
+    oneof port_no_present {
+      int32 port_no = 103 ;
+    }
+    oneof admin_state_present {
+      string admin_state = 104 ;
+    }
+    oneof oper_status_present {
+      string oper_status = 105 ;
+    }
+    oneof olt_device_present {
+      int32 olt_device_id = 201 [(foreignKey).modelName = "OLTDevice", (foreignKey).reverseFieldName = "pon_ports"];
+    }
+    repeated int32 onu_devices_ids  = 1001 [(reverseForeignKey).modelName = "ONUDevice"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message PONPorts {
+    repeated PONPort items = 1;
+}
+
+message PortBase {
+    option (contentTypeId) = "volt.portbase";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof name_present {
+      string name = 101 ;
+    }
+    oneof port_no_present {
+      int32 port_no = 103 ;
+    }
+    oneof admin_state_present {
+      string admin_state = 104 ;
+    }
+    oneof oper_status_present {
+      string oper_status = 105 ;
+    }
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message PortBases {
+    repeated PortBase items = 1;
+}
+
+message RCORDIpAddress {
+    option (contentTypeId) = "rcord.rcordipaddress";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof subscriber_present {
+      int32 subscriber_id = 101 [(val).nonNull = true, (foreignKey).modelName = "RCORDSubscriber", (foreignKey).reverseFieldName = "ips"];
+    }
+    oneof ip_present {
+      string ip = 102 [(val).maxLength = 52, (val).nonNull = true];
+    }
+    oneof description_present {
+      string description = 103 [(val).maxLength = 254, (val).nonNull = true];
+    }
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message RCORDIpAddresses {
+    repeated RCORDIpAddress items = 1;
+}
+
+message RCORDService {
+    option (contentTypeId) = "rcord.rcordservice";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof description_present {
+      string description = 101 [(val).maxLength = 254];
+    }
+    oneof enabled_present {
+      bool enabled = 102 [(val).nonNull = true];
+    }
+    oneof kind_present {
+      string kind = 103 [(val).maxLength = 30, (val).nonNull = true];
+    }
+    oneof name_present {
+      string name = 104 [(val).maxLength = 30, (val).nonNull = true];
+    }
+    oneof versionNumber_present {
+      string versionNumber = 105 [(val).maxLength = 30];
+    }
+    oneof published_present {
+      bool published = 106 [(val).nonNull = true];
+    }
+    oneof icon_url_present {
+      string icon_url = 108 [(val).maxLength = 1024];
+    }
+    oneof public_key_present {
+      string public_key = 109 [(val).maxLength = 4096];
+    }
+    oneof private_key_fn_present {
+      string private_key_fn = 110 [(val).maxLength = 4096];
+    }
+    oneof service_specific_id_present {
+      string service_specific_id = 111 [(val).maxLength = 30];
+    }
+    oneof service_specific_attribute_present {
+      string service_specific_attribute = 112 ;
+    }
+    oneof access_present {
+      string access = 211 [(val).maxLength = 30];
+    }
+    repeated int32 addresspools_ids  = 1001 [(reverseForeignKey).modelName = "AddressPool"];
+    repeated int32 serviceports_ids  = 1002 [(reverseForeignKey).modelName = "ServicePort"];
+    repeated int32 serviceattributes_ids  = 1003 [(reverseForeignKey).modelName = "ServiceAttribute"];
+    repeated int32 provided_dependencies_ids  = 1004 [(reverseForeignKey).modelName = "ServiceDependency"];
+    repeated int32 subscribed_dependencies_ids  = 1005 [(reverseForeignKey).modelName = "ServiceDependency"];
+    repeated int32 slices_ids  = 1006 [(reverseForeignKey).modelName = "Slice"];
+    repeated int32 tags_ids  = 1007 [(reverseForeignKey).modelName = "Tag"];
+    repeated int32 service_interfaces_ids  = 1008 [(reverseForeignKey).modelName = "ServiceInterface"];
+    repeated int32 service_instances_ids  = 1009 [(reverseForeignKey).modelName = "ServiceInstance"];
+    repeated int32 subscribed_links_ids  = 1010 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 owned_trust_domains_ids  = 1011 [(reverseForeignKey).modelName = "TrustDomain"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message RCORDServices {
+    repeated RCORDService items = 1;
+}
+
+message RCORDSubscriber {
+    option (contentTypeId) = "rcord.rcordsubscriber";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof name_present {
+      string name = 101 [(val).maxLength = 200];
+    }
+    oneof owner_present {
+      int32 owner_id = 102 [(val).nonNull = true, (foreignKey).modelName = "Service", (foreignKey).reverseFieldName = "service_instances"];
+    }
+    oneof service_specific_id_present {
+      string service_specific_id = 103 [(val).maxLength = 30];
+    }
+    oneof service_specific_attribute_present {
+      string service_specific_attribute = 110 ;
+    }
+    oneof link_deleted_count_present {
+      uint32 link_deleted_count = 111 ;
+    }
+    oneof master_serviceinstance_present {
+      int32 master_serviceinstance_id = 112 [(foreignKey).modelName = "ServiceInstance", (foreignKey).reverseFieldName = "child_serviceinstances"];
+    }
+    oneof status_present {
+      string status = 211 [(val).maxLength = 30];
+    }
+    oneof c_tag_present {
+      int32 c_tag = 212 ;
+    }
+    oneof onu_device_present {
+      string onu_device = 213 ;
+    }
+    oneof creator_present {
+      int32 creator_id = 215 [(foreignKey).modelName = "User", (foreignKey).reverseFieldName = "created_rcord_subscribers"];
+    }
+    oneof mac_address_present {
+      string mac_address = 218 ;
+    }
+    oneof s_tag_present {
+      int32 s_tag = 219 ;
+    }
+    oneof nas_port_id_present {
+      string nas_port_id = 220 ;
+    }
+    oneof circuit_id_present {
+      string circuit_id = 221 ;
+    }
+    oneof remote_id_present {
+      string remote_id = 222 ;
+    }
+    repeated int32 ports_ids  = 1001 [(reverseForeignKey).modelName = "Port"];
+    repeated int32 child_serviceinstances_ids  = 1002 [(reverseForeignKey).modelName = "ServiceInstance"];
+    repeated int32 provided_links_ids  = 1003 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 subscribed_links_ids  = 1005 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 service_instance_attributes_ids  = 1006 [(reverseForeignKey).modelName = "ServiceInstanceAttribute"];
+    repeated int32 ips_ids  = 1101 [(reverseForeignKey).modelName = "RCORDIpAddress"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message RCORDSubscribers {
+    repeated RCORDSubscriber items = 1;
+}
+
+message UNIPort {
+    option (contentTypeId) = "volt.uniport";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof name_present {
+      string name = 101 ;
+    }
+    oneof port_no_present {
+      int32 port_no = 103 ;
+    }
+    oneof admin_state_present {
+      string admin_state = 104 ;
+    }
+    oneof oper_status_present {
+      string oper_status = 105 ;
+    }
+    oneof onu_device_present {
+      int32 onu_device_id = 201 [(foreignKey).modelName = "ONUDevice", (foreignKey).reverseFieldName = "uni_ports"];
+    }
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message UNIPorts {
+    repeated UNIPort items = 1;
+}
+
+message VOLTService {
+    option (contentTypeId) = "volt.voltservice";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof description_present {
+      string description = 101 [(val).maxLength = 254];
+    }
+    oneof enabled_present {
+      bool enabled = 102 [(val).nonNull = true];
+    }
+    oneof kind_present {
+      string kind = 103 [(val).maxLength = 30, (val).nonNull = true];
+    }
+    oneof name_present {
+      string name = 104 [(val).maxLength = 30, (val).nonNull = true];
+    }
+    oneof versionNumber_present {
+      string versionNumber = 105 [(val).maxLength = 30];
+    }
+    oneof published_present {
+      bool published = 106 [(val).nonNull = true];
+    }
+    oneof icon_url_present {
+      string icon_url = 108 [(val).maxLength = 1024];
+    }
+    oneof public_key_present {
+      string public_key = 109 [(val).maxLength = 4096];
+    }
+    oneof private_key_fn_present {
+      string private_key_fn = 110 [(val).maxLength = 4096];
+    }
+    oneof service_specific_id_present {
+      string service_specific_id = 111 [(val).maxLength = 30];
+    }
+    oneof service_specific_attribute_present {
+      string service_specific_attribute = 112 ;
+    }
+    oneof voltha_url_present {
+      string voltha_url = 201 [(val).maxLength = 254];
+    }
+    oneof voltha_port_present {
+      int32 voltha_port = 202 ;
+    }
+    oneof voltha_user_present {
+      string voltha_user = 203 [(val).maxLength = 254];
+    }
+    oneof voltha_pass_present {
+      string voltha_pass = 204 [(val).maxLength = 254];
+    }
+    oneof onos_voltha_url_present {
+      string onos_voltha_url = 205 [(val).maxLength = 254];
+    }
+    oneof onos_voltha_port_present {
+      int32 onos_voltha_port = 206 ;
+    }
+    oneof onos_voltha_user_present {
+      string onos_voltha_user = 207 [(val).maxLength = 254];
+    }
+    oneof onos_voltha_pass_present {
+      string onos_voltha_pass = 208 [(val).maxLength = 254];
+    }
+    repeated int32 addresspools_ids  = 1001 [(reverseForeignKey).modelName = "AddressPool"];
+    repeated int32 serviceports_ids  = 1002 [(reverseForeignKey).modelName = "ServicePort"];
+    repeated int32 serviceattributes_ids  = 1003 [(reverseForeignKey).modelName = "ServiceAttribute"];
+    repeated int32 provided_dependencies_ids  = 1004 [(reverseForeignKey).modelName = "ServiceDependency"];
+    repeated int32 subscribed_dependencies_ids  = 1005 [(reverseForeignKey).modelName = "ServiceDependency"];
+    repeated int32 slices_ids  = 1006 [(reverseForeignKey).modelName = "Slice"];
+    repeated int32 tags_ids  = 1007 [(reverseForeignKey).modelName = "Tag"];
+    repeated int32 service_interfaces_ids  = 1008 [(reverseForeignKey).modelName = "ServiceInterface"];
+    repeated int32 service_instances_ids  = 1009 [(reverseForeignKey).modelName = "ServiceInstance"];
+    repeated int32 subscribed_links_ids  = 1010 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 owned_trust_domains_ids  = 1011 [(reverseForeignKey).modelName = "TrustDomain"];
+    repeated int32 volt_devices_ids  = 1101 [(reverseForeignKey).modelName = "OLTDevice"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message VOLTServices {
+    repeated VOLTService items = 1;
+}
+
+message VOLTServiceInstance {
+    option (contentTypeId) = "volt.voltserviceinstance";
+    oneof id_present {
+      int32 id = 1 ;
+    }
+    oneof created_present {
+      double created = 2 ;
+    }
+    oneof updated_present {
+      double updated = 3 ;
+    }
+    oneof enacted_present {
+      double enacted = 4 ;
+    }
+    oneof policed_present {
+      double policed = 5 ;
+    }
+    oneof backend_register_present {
+      string backend_register = 6 [(val).maxLength = 1024];
+    }
+    oneof backend_need_delete_present {
+      bool backend_need_delete = 7 ;
+    }
+    oneof backend_need_reap_present {
+      bool backend_need_reap = 8 ;
+    }
+    oneof backend_status_present {
+      string backend_status = 9 [(val).maxLength = 1024];
+    }
+    oneof backend_code_present {
+      int32 backend_code = 10 ;
+    }
+    oneof deleted_present {
+      bool deleted = 11 ;
+    }
+    oneof write_protect_present {
+      bool write_protect = 12 ;
+    }
+    oneof lazy_blocked_present {
+      bool lazy_blocked = 13 ;
+    }
+    oneof no_sync_present {
+      bool no_sync = 14 ;
+    }
+    oneof no_policy_present {
+      bool no_policy = 15 ;
+    }
+    oneof policy_status_present {
+      string policy_status = 16 [(val).maxLength = 1024];
+    }
+    oneof policy_code_present {
+      int32 policy_code = 17 ;
+    }
+    oneof leaf_model_name_present {
+      string leaf_model_name = 18 [(val).maxLength = 1024, (val).nonNull = true];
+    }
+    oneof backend_need_delete_policy_present {
+      bool backend_need_delete_policy = 19 ;
+    }
+    oneof xos_managed_present {
+      bool xos_managed = 20 ;
+    }
+    oneof backend_handle_present {
+      string backend_handle = 21 [(val).maxLength = 1024];
+    }
+    oneof changed_by_step_present {
+      double changed_by_step = 22 ;
+    }
+    oneof changed_by_policy_present {
+      double changed_by_policy = 23 ;
+    }
+    oneof name_present {
+      string name = 101 [(val).maxLength = 200];
+    }
+    oneof owner_present {
+      int32 owner_id = 102 [(val).nonNull = true, (foreignKey).modelName = "Service", (foreignKey).reverseFieldName = "service_instances"];
+    }
+    oneof service_specific_id_present {
+      string service_specific_id = 103 [(val).maxLength = 30];
+    }
+    oneof service_specific_attribute_present {
+      string service_specific_attribute = 110 ;
+    }
+    oneof link_deleted_count_present {
+      uint32 link_deleted_count = 111 ;
+    }
+    oneof master_serviceinstance_present {
+      int32 master_serviceinstance_id = 112 [(foreignKey).modelName = "ServiceInstance", (foreignKey).reverseFieldName = "child_serviceinstances"];
+    }
+    oneof description_present {
+      string description = 201 [(val).maxLength = 254];
+    }
+    oneof onu_device_present {
+      int32 onu_device_id = 202 [(foreignKey).modelName = "ONUDevice", (foreignKey).reverseFieldName = "volt_service_instances"];
+    }
+    repeated int32 ports_ids  = 1001 [(reverseForeignKey).modelName = "Port"];
+    repeated int32 child_serviceinstances_ids  = 1002 [(reverseForeignKey).modelName = "ServiceInstance"];
+    repeated int32 provided_links_ids  = 1003 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 subscribed_links_ids  = 1005 [(reverseForeignKey).modelName = "ServiceInstanceLink"];
+    repeated int32 service_instance_attributes_ids  = 1006 [(reverseForeignKey).modelName = "ServiceInstanceAttribute"];
+  string class_names = 2046;
+  string self_content_type_id = 2047;
+}
+
+message VOLTServiceInstances {
+    repeated VOLTServiceInstance items = 1;
+}
+
+
+service xos {
+
+rpc ListAttWorkflowDriverService(google.protobuf.Empty) returns (AttWorkflowDriverServices) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/att-workflow-driver/attworkflowdriverservices"
+        };
+  }
+  rpc FilterAttWorkflowDriverService(Query) returns (AttWorkflowDriverServices) {
+  }
+  rpc GetAttWorkflowDriverService(ID) returns (AttWorkflowDriverService) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/att-workflow-driver/attworkflowdriverservices/{id}"
+        };
+  }
+  rpc CreateAttWorkflowDriverService(AttWorkflowDriverService) returns (AttWorkflowDriverService) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/att-workflow-driver/attworkflowdriverservices"
+            body: "*"
+        };
+  }
+  rpc UpdateAttWorkflowDriverService(AttWorkflowDriverService) returns (AttWorkflowDriverService) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/att-workflow-driver/attworkflowdriverservices/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteAttWorkflowDriverService(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/att-workflow-driver/attworkflowdriverservices/{id}"
+        };
+  }
+
+rpc ListAttWorkflowDriverServiceInstance(google.protobuf.Empty) returns (AttWorkflowDriverServiceInstances) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/att-workflow-driver/attworkflowdriverserviceinstances"
+        };
+  }
+  rpc FilterAttWorkflowDriverServiceInstance(Query) returns (AttWorkflowDriverServiceInstances) {
+  }
+  rpc GetAttWorkflowDriverServiceInstance(ID) returns (AttWorkflowDriverServiceInstance) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/att-workflow-driver/attworkflowdriverserviceinstances/{id}"
+        };
+  }
+  rpc CreateAttWorkflowDriverServiceInstance(AttWorkflowDriverServiceInstance) returns (AttWorkflowDriverServiceInstance) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/att-workflow-driver/attworkflowdriverserviceinstances"
+            body: "*"
+        };
+  }
+  rpc UpdateAttWorkflowDriverServiceInstance(AttWorkflowDriverServiceInstance) returns (AttWorkflowDriverServiceInstance) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/att-workflow-driver/attworkflowdriverserviceinstances/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteAttWorkflowDriverServiceInstance(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/att-workflow-driver/attworkflowdriverserviceinstances/{id}"
+        };
+  }
+
+rpc ListAttWorkflowDriverWhiteListEntry(google.protobuf.Empty) returns (attworkflowdriverwhitelistentries) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/att-workflow-driver/attworkflowdriverwhitelistentries"
+        };
+  }
+  rpc FilterAttWorkflowDriverWhiteListEntry(Query) returns (attworkflowdriverwhitelistentries) {
+  }
+  rpc GetAttWorkflowDriverWhiteListEntry(ID) returns (AttWorkflowDriverWhiteListEntry) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/att-workflow-driver/attworkflowdriverwhitelistentries/{id}"
+        };
+  }
+  rpc CreateAttWorkflowDriverWhiteListEntry(AttWorkflowDriverWhiteListEntry) returns (AttWorkflowDriverWhiteListEntry) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/att-workflow-driver/attworkflowdriverwhitelistentries"
+            body: "*"
+        };
+  }
+  rpc UpdateAttWorkflowDriverWhiteListEntry(AttWorkflowDriverWhiteListEntry) returns (AttWorkflowDriverWhiteListEntry) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/att-workflow-driver/attworkflowdriverwhitelistentries/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteAttWorkflowDriverWhiteListEntry(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/att-workflow-driver/attworkflowdriverwhitelistentries/{id}"
+        };
+  }
+
+rpc ListBNGPortMapping(google.protobuf.Empty) returns (BNGPortMappings) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/fabric-crossconnect/bngportmappings"
+        };
+  }
+  rpc FilterBNGPortMapping(Query) returns (BNGPortMappings) {
+  }
+  rpc GetBNGPortMapping(ID) returns (BNGPortMapping) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/fabric-crossconnect/bngportmappings/{id}"
+        };
+  }
+  rpc CreateBNGPortMapping(BNGPortMapping) returns (BNGPortMapping) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/fabric-crossconnect/bngportmappings"
+            body: "*"
+        };
+  }
+  rpc UpdateBNGPortMapping(BNGPortMapping) returns (BNGPortMapping) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/fabric-crossconnect/bngportmappings/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteBNGPortMapping(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/fabric-crossconnect/bngportmappings/{id}"
+        };
+  }
+
+rpc ListFabricCrossconnectService(google.protobuf.Empty) returns (FabricCrossconnectServices) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectservices"
+        };
+  }
+  rpc FilterFabricCrossconnectService(Query) returns (FabricCrossconnectServices) {
+  }
+  rpc GetFabricCrossconnectService(ID) returns (FabricCrossconnectService) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectservices/{id}"
+        };
+  }
+  rpc CreateFabricCrossconnectService(FabricCrossconnectService) returns (FabricCrossconnectService) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectservices"
+            body: "*"
+        };
+  }
+  rpc UpdateFabricCrossconnectService(FabricCrossconnectService) returns (FabricCrossconnectService) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectservices/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteFabricCrossconnectService(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectservices/{id}"
+        };
+  }
+
+rpc ListFabricCrossconnectServiceInstance(google.protobuf.Empty) returns (FabricCrossconnectServiceInstances) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectserviceinstances"
+        };
+  }
+  rpc FilterFabricCrossconnectServiceInstance(Query) returns (FabricCrossconnectServiceInstances) {
+  }
+  rpc GetFabricCrossconnectServiceInstance(ID) returns (FabricCrossconnectServiceInstance) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectserviceinstances/{id}"
+        };
+  }
+  rpc CreateFabricCrossconnectServiceInstance(FabricCrossconnectServiceInstance) returns (FabricCrossconnectServiceInstance) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectserviceinstances"
+            body: "*"
+        };
+  }
+  rpc UpdateFabricCrossconnectServiceInstance(FabricCrossconnectServiceInstance) returns (FabricCrossconnectServiceInstance) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectserviceinstances/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteFabricCrossconnectServiceInstance(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/fabric-crossconnect/fabriccrossconnectserviceinstances/{id}"
+        };
+  }
+
+rpc ListNNIPort(google.protobuf.Empty) returns (NNIPorts) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/nniports"
+        };
+  }
+  rpc FilterNNIPort(Query) returns (NNIPorts) {
+  }
+  rpc GetNNIPort(ID) returns (NNIPort) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/nniports/{id}"
+        };
+  }
+  rpc CreateNNIPort(NNIPort) returns (NNIPort) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/volt/nniports"
+            body: "*"
+        };
+  }
+  rpc UpdateNNIPort(NNIPort) returns (NNIPort) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/volt/nniports/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteNNIPort(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/volt/nniports/{id}"
+        };
+  }
+
+rpc ListOLTDevice(google.protobuf.Empty) returns (OLTDevices) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/oltdevices"
+        };
+  }
+  rpc FilterOLTDevice(Query) returns (OLTDevices) {
+  }
+  rpc GetOLTDevice(ID) returns (OLTDevice) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/oltdevices/{id}"
+        };
+  }
+  rpc CreateOLTDevice(OLTDevice) returns (OLTDevice) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/volt/oltdevices"
+            body: "*"
+        };
+  }
+  rpc UpdateOLTDevice(OLTDevice) returns (OLTDevice) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/volt/oltdevices/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteOLTDevice(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/volt/oltdevices/{id}"
+        };
+  }
+
+rpc ListONUDevice(google.protobuf.Empty) returns (ONUDevices) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/onudevices"
+        };
+  }
+  rpc FilterONUDevice(Query) returns (ONUDevices) {
+  }
+  rpc GetONUDevice(ID) returns (ONUDevice) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/onudevices/{id}"
+        };
+  }
+  rpc CreateONUDevice(ONUDevice) returns (ONUDevice) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/volt/onudevices"
+            body: "*"
+        };
+  }
+  rpc UpdateONUDevice(ONUDevice) returns (ONUDevice) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/volt/onudevices/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteONUDevice(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/volt/onudevices/{id}"
+        };
+  }
+
+rpc ListPONONUPort(google.protobuf.Empty) returns (PONONUPorts) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/pononuports"
+        };
+  }
+  rpc FilterPONONUPort(Query) returns (PONONUPorts) {
+  }
+  rpc GetPONONUPort(ID) returns (PONONUPort) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/pononuports/{id}"
+        };
+  }
+  rpc CreatePONONUPort(PONONUPort) returns (PONONUPort) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/volt/pononuports"
+            body: "*"
+        };
+  }
+  rpc UpdatePONONUPort(PONONUPort) returns (PONONUPort) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/volt/pononuports/{id}"
+            body: "*"
+        };
+  }
+  rpc DeletePONONUPort(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/volt/pononuports/{id}"
+        };
+  }
+
+rpc ListPONPort(google.protobuf.Empty) returns (PONPorts) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/ponports"
+        };
+  }
+  rpc FilterPONPort(Query) returns (PONPorts) {
+  }
+  rpc GetPONPort(ID) returns (PONPort) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/ponports/{id}"
+        };
+  }
+  rpc CreatePONPort(PONPort) returns (PONPort) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/volt/ponports"
+            body: "*"
+        };
+  }
+  rpc UpdatePONPort(PONPort) returns (PONPort) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/volt/ponports/{id}"
+            body: "*"
+        };
+  }
+  rpc DeletePONPort(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/volt/ponports/{id}"
+        };
+  }
+
+rpc ListPortBase(google.protobuf.Empty) returns (PortBases) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/portbases"
+        };
+  }
+  rpc FilterPortBase(Query) returns (PortBases) {
+  }
+  rpc GetPortBase(ID) returns (PortBase) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/portbases/{id}"
+        };
+  }
+  rpc CreatePortBase(PortBase) returns (PortBase) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/volt/portbases"
+            body: "*"
+        };
+  }
+  rpc UpdatePortBase(PortBase) returns (PortBase) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/volt/portbases/{id}"
+            body: "*"
+        };
+  }
+  rpc DeletePortBase(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/volt/portbases/{id}"
+        };
+  }
+
+rpc ListRCORDIpAddress(google.protobuf.Empty) returns (RCORDIpAddresses) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/rcord/rcordipaddresses"
+        };
+  }
+  rpc FilterRCORDIpAddress(Query) returns (RCORDIpAddresses) {
+  }
+  rpc GetRCORDIpAddress(ID) returns (RCORDIpAddress) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/rcord/rcordipaddresses/{id}"
+        };
+  }
+  rpc CreateRCORDIpAddress(RCORDIpAddress) returns (RCORDIpAddress) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/rcord/rcordipaddresses"
+            body: "*"
+        };
+  }
+  rpc UpdateRCORDIpAddress(RCORDIpAddress) returns (RCORDIpAddress) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/rcord/rcordipaddresses/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteRCORDIpAddress(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/rcord/rcordipaddresses/{id}"
+        };
+  }
+
+rpc ListRCORDService(google.protobuf.Empty) returns (RCORDServices) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/rcord/rcordservices"
+        };
+  }
+  rpc FilterRCORDService(Query) returns (RCORDServices) {
+  }
+  rpc GetRCORDService(ID) returns (RCORDService) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/rcord/rcordservices/{id}"
+        };
+  }
+  rpc CreateRCORDService(RCORDService) returns (RCORDService) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/rcord/rcordservices"
+            body: "*"
+        };
+  }
+  rpc UpdateRCORDService(RCORDService) returns (RCORDService) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/rcord/rcordservices/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteRCORDService(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/rcord/rcordservices/{id}"
+        };
+  }
+
+rpc ListRCORDSubscriber(google.protobuf.Empty) returns (RCORDSubscribers) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/rcord/rcordsubscribers"
+        };
+  }
+  rpc FilterRCORDSubscriber(Query) returns (RCORDSubscribers) {
+  }
+  rpc GetRCORDSubscriber(ID) returns (RCORDSubscriber) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/rcord/rcordsubscribers/{id}"
+        };
+  }
+  rpc CreateRCORDSubscriber(RCORDSubscriber) returns (RCORDSubscriber) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/rcord/rcordsubscribers"
+            body: "*"
+        };
+  }
+  rpc UpdateRCORDSubscriber(RCORDSubscriber) returns (RCORDSubscriber) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/rcord/rcordsubscribers/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteRCORDSubscriber(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/rcord/rcordsubscribers/{id}"
+        };
+  }
+
+rpc ListUNIPort(google.protobuf.Empty) returns (UNIPorts) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/uniports"
+        };
+  }
+  rpc FilterUNIPort(Query) returns (UNIPorts) {
+  }
+  rpc GetUNIPort(ID) returns (UNIPort) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/uniports/{id}"
+        };
+  }
+  rpc CreateUNIPort(UNIPort) returns (UNIPort) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/volt/uniports"
+            body: "*"
+        };
+  }
+  rpc UpdateUNIPort(UNIPort) returns (UNIPort) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/volt/uniports/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteUNIPort(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/volt/uniports/{id}"
+        };
+  }
+
+rpc ListVOLTService(google.protobuf.Empty) returns (VOLTServices) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/voltservices"
+        };
+  }
+  rpc FilterVOLTService(Query) returns (VOLTServices) {
+  }
+  rpc GetVOLTService(ID) returns (VOLTService) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/voltservices/{id}"
+        };
+  }
+  rpc CreateVOLTService(VOLTService) returns (VOLTService) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/volt/voltservices"
+            body: "*"
+        };
+  }
+  rpc UpdateVOLTService(VOLTService) returns (VOLTService) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/volt/voltservices/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteVOLTService(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/volt/voltservices/{id}"
+        };
+  }
+
+rpc ListVOLTServiceInstance(google.protobuf.Empty) returns (VOLTServiceInstances) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/voltserviceinstances"
+        };
+  }
+  rpc FilterVOLTServiceInstance(Query) returns (VOLTServiceInstances) {
+  }
+  rpc GetVOLTServiceInstance(ID) returns (VOLTServiceInstance) {
+        option (googleapi.http) = {
+            get: "/xosapi/v1/volt/voltserviceinstances/{id}"
+        };
+  }
+  rpc CreateVOLTServiceInstance(VOLTServiceInstance) returns (VOLTServiceInstance) {
+        option (googleapi.http) = {
+            post: "/xosapi/v1/volt/voltserviceinstances"
+            body: "*"
+        };
+  }
+  rpc UpdateVOLTServiceInstance(VOLTServiceInstance) returns (VOLTServiceInstance) {
+        option (googleapi.http) = {
+            put: "/xosapi/v1/volt/voltserviceinstances/{id}"
+            body: "*"
+        };
+  }
+  rpc DeleteVOLTServiceInstance(ID) returns (google.protobuf.Empty) {
+        option (googleapi.http) = {
+            delete: "/xosapi/v1/volt/voltserviceinstances/{id}"
+        };
+  }
+
+}
+

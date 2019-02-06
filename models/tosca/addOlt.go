@@ -44,10 +44,10 @@ topology_template:
            host: test
            port: 32
            outer_tpid: "0x8100"
-           uplink: "65536"
            nas_id:
            switch_datapath_id: of:0000000000000001
            switch_port: "1"
+           uplink: "65536"
         requirements:
           - volt_service:
               node: service#volt

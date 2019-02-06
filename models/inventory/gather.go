@@ -48,6 +48,7 @@ type Port struct {
 }
 type Ont struct {
 	Number       int
+	Active       bool
 	SVlan        uint32
 	CVlan        uint32
 	SerialNumber string
@@ -114,8 +115,8 @@ func parseClli(clli string, chassisHolder *models.ChassisHolder) Chassis {
 					port := Port{AbstractNumber: i + 1, PhysicalNumber: ponPort.Number}
 					onts := []Ont{}
 					for _, physicalONT := range ponPort.Onts {
-						if physicalONT.Active {
-							ont := Ont{Number: physicalONT.Number, SVlan: physicalONT.Svlan, CVlan: physicalONT.Cvlan, SerialNumber: physicalONT.SerialNumber,
+						if physicalONT.CircuitID != "" {
+							ont := Ont{Number: physicalONT.Number, Active: physicalONT.Active, SVlan: physicalONT.Svlan, CVlan: physicalONT.Cvlan, SerialNumber: physicalONT.SerialNumber,
 								NasPortID: physicalONT.NasPortID, CircuitID: physicalONT.CircuitID}
 							onts = append(onts, ont)
 						}
