@@ -1,3 +1,9 @@
+# DEPRECATED
+
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
+This codebase is tale and not used anymore in SEBA/VOLTHA projects, thus is going to be removed after the VOLTHA 2.8 release LTS support ends in December 2022.
+
 # AbstractOLT
 AbstractOLT provides a mapping service from AT&T's, and potentially other's, provisioning platform to SEBA/Voltha.
 It presents a facade of the hardware that resembles a 16 slot / with 16 PON ports each.
